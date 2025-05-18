@@ -1,11 +1,15 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
-import { ChevronDown } from "lucide-react"
+import { Menu, X } from "lucide-react"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 export function SiteHeader() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-20 items-center">
@@ -19,35 +23,61 @@ export function SiteHeader() {
               className="h-10 w-auto"
             />
           </Link>
+          
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <Link href="/a-propos" className="text-primary hover:text-primary-light transition-colors">
+              À Propos
+            </Link>
             <Link href="/commencer">
               <Button variant="default" className="bg-primary hover:bg-primary-light text-white">
                 Commencer
               </Button>
             </Link>
-            <Link href="/a-propos" className="text-primary hover:text-primary-light transition-colors">
-              À Propos
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-primary hover:text-primary-light transition-colors">
-                <span>Nos Centres</span>
-                <ChevronDown className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Link href="/centres/paris">Paris</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/centres/lyon">Lyon</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/centres/bordeaux">Bordeaux</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </nav>
+          
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6 text-primary" />
+              ) : (
+                <Menu className="h-6 w-6 text-primary" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
+      
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden">
+          <div className="container py-4 bg-background border-t">
+            <nav className="flex flex-col space-y-4">
+              <Link 
+                href="/a-propos" 
+                className="text-primary hover:text-primary-light transition-colors px-2 py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                À Propos
+              </Link>
+              <Link 
+                href="/commencer" 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Button variant="default" className="w-full bg-primary hover:bg-primary-light text-white">
+                  Commencer
+                </Button>
+              </Link>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   )
 }
