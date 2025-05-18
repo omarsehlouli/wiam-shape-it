@@ -8,7 +8,11 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Shape It - no limits.",
   description: "Un studio privé dédié à votre évolution physique et mentale. Une expérience sur-mesure, dans un cadre intime, exclusif et motivant.",
-  generator: 'oseh'
+  generator: 'oseh',
+  icons: {
+    icon: '/logo3.png',
+    apple: '/logo3.png',
+  }
 }
 
 export default function RootLayout({
@@ -18,6 +22,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr">
+      <head>
+        <link rel="icon" href="/logo3.png" />
+        <link rel="apple-touch-icon" href="/logo3.png" />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )
