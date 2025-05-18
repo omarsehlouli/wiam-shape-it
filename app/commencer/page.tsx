@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { CheckSquare, ThumbsUp, ArrowLeft, ArrowRight } from "lucide-react"
+import { CheckSquare, ThumbsUp, ArrowLeft, ArrowRight, Phone } from "lucide-react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
   faCalendar, 
@@ -11,7 +11,8 @@ import {
   faBullseye, 
   faPhoneAlt, 
   faCheckCircle, 
-  faQuestionCircle 
+  faQuestionCircle,
+  faEnvelope 
 } from '@fortawesome/free-solid-svg-icons'
 
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
 
 const countries = [
   { code: "MA", name: "Morocco", flag: "🇲🇦", dialCode: "+212" },
@@ -46,7 +48,17 @@ export default function StartForm() {
     phoneConfirm: "",
     consent: false,
     source: "",
+    submittedAt: ""
   })
+  const [isEditingPhone, setIsEditingPhone] = useState(false)
+  const [newPhone, setNewPhone] = useState("")
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('shapeItFormData', JSON.stringify(formData));
+    }
+  }, [formData]);
 
   const centers = [
     {
@@ -90,7 +102,24 @@ export default function StartForm() {
       setStep(step + 1)
     } else {
       // Handle form submission
-      console.log(formData)
+      const finalFormData = {
+        ...formData,
+        submittedAt: new Date().toISOString()
+      }
+      console.log(finalFormData)
+      
+      // Save to localStorage for later email sending
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
+        
+        // This could later be replaced with an actual API call to send the data to the server
+        // fetch('/api/submit-form', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(finalFormData)
+        // })
+      }
+      
       setStep(8) // Show thank you page
     }
   }
@@ -99,6 +128,25 @@ export default function StartForm() {
     if (step > 1) {
       setStep(step - 1)
     }
+  }
+
+  const handlePhoneConfirmation = (value: string) => {
+    setFormData({ ...formData, phoneConfirm: value });
+    
+    if (value === "yes") {
+      // Auto-proceed to next step if 'Yes' is selected
+      setTimeout(() => setStep(step + 1), 300);
+    } else {
+      // Show the edit phone UI if 'No' is selected
+      setIsEditingPhone(true);
+      setNewPhone(formData.phone);
+    }
+  }
+
+  const handlePhoneUpdate = () => {
+    setFormData({ ...formData, phone: newPhone, phoneConfirm: "yes" });
+    setIsEditingPhone(false);
+    setTimeout(() => setStep(step + 1), 300);
   }
 
   // Calculate progress percentage
@@ -379,24 +427,72 @@ export default function StartForm() {
                       <p className="text-xl font-bold">{formData.phone}</p>
                     </div>
                     
-                    <RadioGroup
-                      value={formData.phoneConfirm}
-                      onValueChange={(value) => setFormData({ ...formData, phoneConfirm: value })}
-                      className="flex justify-center gap-4"
-                    >
-                      <div className={`flex-1 flex items-center justify-center p-3 rounded-lg border border-gray-200 transition-all hover:border-primary/30 hover:bg-primary/5 ${formData.phoneConfirm === "yes" ? 'bg-primary/5 border-primary/30 shadow-sm' : ''}`}>
-                        <RadioGroupItem value="yes" id="confirm-yes" className="hidden" />
-                        <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
-                          <span className="font-medium">Oui</span>
-                        </Label>
+                    {!isEditingPhone ? (
+                      <RadioGroup
+                        value={formData.phoneConfirm}
+                        onValueChange={(value) => handlePhoneConfirmation(value)}
+                        className="flex justify-center gap-4"
+                      >
+                        <div className={`flex-1 flex items-center justify-center p-3 rounded-lg border border-gray-200 transition-all hover:border-primary/30 hover:bg-primary/5 ${formData.phoneConfirm === "yes" ? 'bg-primary/5 border-primary/30 shadow-sm' : ''}`}>
+                          <RadioGroupItem value="yes" id="confirm-yes" className="hidden" />
+                          <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
+                            <span className="font-medium">Oui</span>
+                          </Label>
+                        </div>
+                        <div className={`flex-1 flex items-center justify-center p-3 rounded-lg border border-gray-200 transition-all hover:border-primary/30 hover:bg-primary/5 ${formData.phoneConfirm === "no" ? 'bg-primary/5 border-primary/30 shadow-sm' : ''}`}>
+                          <RadioGroupItem value="no" id="confirm-no" className="hidden" />
+                          <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
+                            <span className="font-medium">Non</span>
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    ) : (
+                      <div className="space-y-4 mt-6 animate-in fade-in-50 slide-in-from-bottom-5 duration-300">
+                        <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
+                          <h3 className="font-medium text-primary mb-3 flex items-center">
+                            <Phone className="w-4 h-4 mr-2" />
+                            Modifiez votre numéro de téléphone
+                          </h3>
+                          <div className="flex">
+                            <Select
+                              value={formData.countryCode}
+                              onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
+                            >
+                              <SelectTrigger className="w-[120px] border-r-0 rounded-r-none transition-all focus:ring-2 focus:ring-primary/20">
+                                <SelectValue placeholder="Pays" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {countries.map((country) => (
+                                  <SelectItem key={country.code} value={country.code}>
+                                    <span className="flex items-center">
+                                      <span className="mr-2">{country.flag}</span>
+                                      <span>{country.dialCode}</span>
+                                    </span>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Input
+                              type="tel"
+                              required
+                              value={newPhone}
+                              onChange={(e) => setNewPhone(e.target.value)}
+                              className="flex-1 rounded-l-none transition-all focus:ring-2 focus:ring-primary/20"
+                              placeholder="Votre téléphone"
+                            />
+                          </div>
+                          <div className="flex justify-end mt-4">
+                            <Button 
+                              type="button"
+                              onClick={handlePhoneUpdate}
+                              className="bg-primary hover:bg-primary-light text-white transition-all"
+                            >
+                              Confirmer
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                      <div className={`flex-1 flex items-center justify-center p-3 rounded-lg border border-gray-200 transition-all hover:border-primary/30 hover:bg-primary/5 ${formData.phoneConfirm === "no" ? 'bg-primary/5 border-primary/30 shadow-sm' : ''}`}>
-                        <RadioGroupItem value="no" id="confirm-no" className="hidden" />
-                        <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
-                          <span className="font-medium">Non</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
+                    )}
                   </div>
                 )}
 
@@ -475,13 +571,15 @@ export default function StartForm() {
                     <div></div> // Empty div for spacing when no back button
                   )}
                   
-                  <Button
-                    type="submit"
-                    className={`bg-primary hover:bg-primary-light text-white px-6 py-2 transition-all flex items-center ${step === 1 ? "w-full" : ""}`}
-                  >
-                    <span>{step === 7 ? "Envoyer" : "Suivant"}</span>
-                    {step !== 7 && <ArrowRight className="h-4 w-4 ml-2" />}
-                  </Button>
+                  {!(step === 5 && isEditingPhone) && (
+                    <Button
+                      type="submit"
+                      className={`bg-primary hover:bg-primary-light text-white px-6 py-2 transition-all flex items-center ${step === 1 ? "w-full" : ""}`}
+                    >
+                      <span>{step === 7 ? "Envoyer" : "Suivant"}</span>
+                      {step !== 7 && <ArrowRight className="h-4 w-4 ml-2" />}
+                    </Button>
+                  )}
                 </div>
               </form>
             </div>
@@ -501,6 +599,11 @@ export default function StartForm() {
               <p className="text-gray-700 mb-8">
                 En attendant, nous vous invitons à découvrir les témoignages des clients qui nous ont fait confiance.
               </p>
+              
+              <div className="flex items-center justify-center bg-primary/5 p-3 rounded-lg mb-8">
+                <FontAwesomeIcon icon={faEnvelope} className="text-primary mr-3" />
+                <p className="text-primary-light">Une confirmation a été envoyée à {formData.email}</p>
+              </div>
               
               <div className="mt-10 space-y-6 bg-primary/5 p-6 rounded-lg border border-primary/20 text-left">
                 <h2 className="text-xl font-bold text-primary text-center">
