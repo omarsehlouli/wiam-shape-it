@@ -144,9 +144,21 @@ export default function StartForm() {
   }
 
   const handlePhoneUpdate = () => {
-    setFormData({ ...formData, phone: newPhone, phoneConfirm: "yes" });
+    setFormData({ ...formData, phone: newPhone, phoneConfirm: "" });
     setIsEditingPhone(false);
-    setTimeout(() => setStep(step + 1), 300);
+    // Don't auto-proceed, let them confirm the new number first
+  }
+
+  // Get country dial code from country code
+  const getDialCode = (code: string) => {
+    const country = countries.find(c => c.code === code);
+    return country ? country.dialCode : "";
+  }
+
+  // Get country flag and details
+  const getCountryDetails = (code: string) => {
+    const country = countries.find(c => c.code === code);
+    return country || countries[0]; // Default to first country if not found
   }
 
   // Calculate progress percentage
@@ -424,7 +436,12 @@ export default function StartForm() {
                     
                     <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center mb-4">
                       <p className="text-lg font-medium text-primary">Est-ce bien votre numéro ?</p>
-                      <p className="text-xl font-bold">{formData.phone}</p>
+                      <div className="flex items-center justify-center mt-2">
+                        <div className="bg-white px-3 py-2 rounded-lg border border-gray-200 inline-flex items-center">
+                          <span className="mr-2 text-lg">{getCountryDetails(formData.countryCode).flag}</span>
+                          <span className="font-bold text-xl">{getDialCode(formData.countryCode)} {formData.phone}</span>
+                        </div>
+                      </div>
                     </div>
                     
                     {!isEditingPhone ? (
@@ -459,7 +476,12 @@ export default function StartForm() {
                               onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
                             >
                               <SelectTrigger className="w-[120px] border-r-0 rounded-r-none transition-all focus:ring-2 focus:ring-primary/20">
-                                <SelectValue placeholder="Pays" />
+                                <SelectValue>
+                                  <span className="flex items-center">
+                                    <span className="mr-1">{getCountryDetails(formData.countryCode).flag}</span>
+                                    <span>{getDialCode(formData.countryCode)}</span>
+                                  </span>
+                                </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
                                 {countries.map((country) => (
@@ -487,7 +509,7 @@ export default function StartForm() {
                               onClick={handlePhoneUpdate}
                               className="bg-primary hover:bg-primary-light text-white transition-all"
                             >
-                              Confirmer
+                              Mettre à jour pour confirmation
                             </Button>
                           </div>
                         </div>
