@@ -40,7 +40,7 @@ export default function AProposPage() {
             <div className="relative h-[500px] rounded-lg overflow-hidden shadow-xl">
               <Image 
                 src="/gym_entrance.webp"
-                alt="Shape It"
+                alt="Shape It No Limit"
                 fill
                 className="object-cover"
               />
