@@ -69,7 +69,7 @@ export function SiteHeader() {
               size="icon" 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
-              className={`${scrolled ? 'text-primary' : 'text-white'} hover:bg-transparent`}
+              className={`${scrolled ? 'text-primary' : 'text-primary-dark'} hover:bg-transparent`}
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />
