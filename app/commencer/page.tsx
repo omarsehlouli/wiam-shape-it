@@ -56,6 +56,7 @@ export default function StartForm() {
   })
   const [isEditingPhone, setIsEditingPhone] = useState(false)
   const [newPhone, setNewPhone] = useState("")
+  const [errors, setErrors] = useState<{ [key: string]: string }>({})
 
   // Save form data to localStorage whenever it changes
   useEffect(() => {
@@ -90,8 +91,101 @@ export default function StartForm() {
     { id: "word-of-mouth", label: "Bouche à Oreille" },
   ]
 
+  const validateStep = (currentStep: number): boolean => {
+    const newErrors: { [key: string]: string } = {};
+    
+    switch (currentStep) {
+      case 1:
+        if (!formData.firstName.trim()) {
+          newErrors.firstName = "Le prénom est requis";
+        }
+        if (!formData.lastName.trim()) {
+          newErrors.lastName = "Le nom est requis";
+        }
+        if (!formData.phone.trim()) {
+          newErrors.phone = "Le numéro de téléphone est requis";
+        } else if (!/^\d{8,12}$/.test(formData.phone.trim())) {
+          newErrors.phone = "Veuillez entrer un numéro de téléphone valide";
+        }
+        if (!formData.email.trim()) {
+          newErrors.email = "L'email est requis";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+          newErrors.email = "Veuillez entrer une adresse email valide";
+        }
+        break;
+      
+      case 2:
+        if (!formData.birthDate.day || !formData.birthDate.month || !formData.birthDate.year) {
+          newErrors.birthDate = "La date de naissance complète est requise";
+        } else {
+          const day = parseInt(formData.birthDate.day);
+          const month = parseInt(formData.birthDate.month);
+          const year = parseInt(formData.birthDate.year);
+          
+          if (isNaN(day) || day < 1 || day > 31) {
+            newErrors.birthDate = "Jour invalide";
+          }
+          if (isNaN(month) || month < 1 || month > 12) {
+            newErrors.birthDate = "Mois invalide";
+          }
+          if (isNaN(year) || year < 1940 || year > new Date().getFullYear() - 16) {
+            newErrors.birthDate = "Année invalide";
+          }
+        }
+        break;
+      
+      case 3:
+        if (!formData.center) {
+          newErrors.center = "Veuillez sélectionner une option";
+        }
+        break;
+        
+      case 4:
+        if (formData.goals.length === 0) {
+          newErrors.goals = "Veuillez sélectionner au moins un objectif";
+        }
+        break;
+        
+      case 5:
+        if (!formData.phoneConfirm && !isEditingPhone) {
+          newErrors.phoneConfirm = "Veuillez confirmer votre numéro de téléphone";
+        }
+        break;
+        
+      case 6:
+        if (!formData.coachGender) {
+          newErrors.coachGender = "Veuillez sélectionner une préférence de coach";
+        }
+        if (!formData.consent) {
+          newErrors.consent = "Vous devez accepter les conditions pour continuer";
+        }
+        break;
+        
+      case 7:
+        if (!formData.source) {
+          newErrors.source = "Veuillez indiquer comment vous avez connu Shape It";
+        }
+        break;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Validate current step
+    if (!validateStep(step)) {
+      // Display toast notification for error
+      toast({
+        title: "Formulaire incomplet",
+        description: "Veuillez remplir tous les champs requis pour continuer.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (step < 7) {
       setStep(step + 1)
     } else {
@@ -102,19 +196,32 @@ export default function StartForm() {
       }
       console.log("Form Submitted:", finalFormData)
       
-      // Save to localStorage for later email sending
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
+      try {
+        // Send form data to API
+        const response = await fetch('/api/submit-form', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(finalFormData)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to submit form');
+        }
+
+        // Save to localStorage for backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
+        }
         
-        // This could later be replaced with an actual API call to send the data to the server
-        // fetch('/api/submit-form', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify(finalFormData)
-        // })
+        setStep(8) // Show thank you page
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        toast({
+          title: "Erreur",
+          description: "Une erreur est survenue lors de l'envoi du formulaire. Veuillez réessayer.",
+          variant: "destructive",
+        });
       }
-      
-      setStep(8) // Show thank you page
     }
   }
 
@@ -215,9 +322,12 @@ export default function StartForm() {
                           required
                           value={formData.firstName}
                           onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                          className="mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.firstName ? 'border-red-500' : ''}`}
                           placeholder="Votre prénom"
                         />
+                        {errors.firstName && (
+                          <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="lastName" className="text-sm font-medium text-primary-dark">Nom *</Label>
@@ -226,9 +336,12 @@ export default function StartForm() {
                           required
                           value={formData.lastName}
                           onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                          className="mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.lastName ? 'border-red-500' : ''}`}
                           placeholder="Votre nom"
                         />
+                        {errors.lastName && (
+                          <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="phone" className="text-sm font-medium text-primary-dark">Numéro de téléphone *</Label>
@@ -237,7 +350,7 @@ export default function StartForm() {
                             value={formData.countryCode}
                             onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
                           >
-                            <SelectTrigger className="w-[120px] border-r-0 rounded-r-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium">
+                            <SelectTrigger className={`w-[120px] border-r-0 rounded-r-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.phone ? 'border-red-500' : ''}`}>
                               <SelectValue placeholder="Pays" />
                             </SelectTrigger>
                             <SelectContent className="bg-white">
@@ -257,10 +370,13 @@ export default function StartForm() {
                             required
                             value={formData.phone}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="flex-1 rounded-l-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                            className={`flex-1 rounded-l-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.phone ? 'border-red-500' : ''}`}
                             placeholder="Votre téléphone"
                           />
                         </div>
+                        {errors.phone && (
+                          <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                        )}
                       </div>
                       <div>
                         <Label htmlFor="email" className="text-sm font-medium text-primary-dark">E-mail *</Label>
@@ -270,9 +386,12 @@ export default function StartForm() {
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.email ? 'border-red-500' : ''}`}
                           placeholder="votre@email.com"
                         />
+                        {errors.email && (
+                          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -304,7 +423,7 @@ export default function StartForm() {
                               birthDate: { ...formData.birthDate, month: e.target.value },
                             })
                           }
-                          className="mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
                         />
                       </div>
                       <div>
@@ -321,7 +440,7 @@ export default function StartForm() {
                               birthDate: { ...formData.birthDate, day: e.target.value },
                             })
                           }
-                          className="mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
                         />
                       </div>
                       <div>
@@ -338,9 +457,14 @@ export default function StartForm() {
                               birthDate: { ...formData.birthDate, year: e.target.value },
                             })
                           }
-                          className="mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
+                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
                         />
                       </div>
+                      {errors.birthDate && (
+                        <div className="col-span-3">
+                          <p className="text-red-500 text-sm mt-1">{errors.birthDate}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -370,24 +494,32 @@ export default function StartForm() {
                       value={formData.center}
                       onValueChange={(value) => {
                         setFormData({ ...formData, center: value });
-                        // Auto-proceed to next step if value is selected
-                        setTimeout(() => setStep(step + 1), 300);
+                        // Auto-proceed to next step if value is selected and valid
+                        if (value) {
+                          const newErrors = { ...errors };
+                          delete newErrors.center;
+                          setErrors(newErrors);
+                          setTimeout(() => setStep(step + 1), 300);
+                        }
                       }}
                       className="flex justify-center gap-4"
                     >
-                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.center === "ain-diab" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.center ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.center === "ain-diab" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
                         <RadioGroupItem value="ain-diab" id="confirm-yes" className="hidden" />
                         <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
                           <span className="font-medium text-primary-dark">Oui</span>
                         </Label>
                       </div>
-                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.center === "need-info" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.center ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.center === "need-info" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
                         <RadioGroupItem value="need-info" id="confirm-no" className="hidden" />
                         <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
                           <span className="font-medium text-primary-dark">Non</span>
                         </Label>
                       </div>
                     </RadioGroup>
+                    {errors.center && (
+                      <p className="text-red-500 text-sm mt-2 text-center">{errors.center}</p>
+                    )}
                   </div>
                 )}
 
@@ -408,17 +540,23 @@ export default function StartForm() {
                       {goals.map((goal) => (
                         <div 
                           key={goal.id} 
-                          className={`flex items-center space-x-3 p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.goals.includes(goal.id) ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
+                          className={`flex items-center space-x-3 p-4 rounded-lg border ${errors.goals ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.goals.includes(goal.id) ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
                         >
                           <Checkbox
                             id={goal.id}
                             checked={formData.goals.includes(goal.id)}
                             onCheckedChange={(checked) => {
                               if (checked) {
+                                const newGoals = [...formData.goals, goal.id];
                                 setFormData({
                                   ...formData,
-                                  goals: [...formData.goals, goal.id],
-                                })
+                                  goals: newGoals,
+                                });
+                                if (newGoals.length > 0) {
+                                  const newErrors = { ...errors };
+                                  delete newErrors.goals;
+                                  setErrors(newErrors);
+                                }
                               } else {
                                 setFormData({
                                   ...formData,
@@ -434,6 +572,9 @@ export default function StartForm() {
                         </div>
                       ))}
                     </div>
+                    {errors.goals && (
+                      <p className="text-red-500 text-sm mt-2 text-center">{errors.goals}</p>
+                    )}
                   </div>
                 )}
 
@@ -460,24 +601,29 @@ export default function StartForm() {
                     </div>
                     
                     {!isEditingPhone ? (
-                      <RadioGroup
-                        value={formData.phoneConfirm}
-                        onValueChange={(value) => handlePhoneConfirmation(value)}
-                        className="flex justify-center gap-4"
-                      >
-                        <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.phoneConfirm === "yes" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                          <RadioGroupItem value="yes" id="confirm-yes" className="hidden" />
-                          <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
-                            <span className="font-medium text-primary-dark">Oui</span>
-                          </Label>
-                        </div>
-                        <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.phoneConfirm === "no" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                          <RadioGroupItem value="no" id="confirm-no" className="hidden" />
-                          <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
-                            <span className="font-medium text-primary-dark">Non</span>
-                          </Label>
-                        </div>
-                      </RadioGroup>
+                      <>
+                        <RadioGroup
+                          value={formData.phoneConfirm}
+                          onValueChange={(value) => handlePhoneConfirmation(value)}
+                          className="flex justify-center gap-4"
+                        >
+                          <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.phoneConfirm ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.phoneConfirm === "yes" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                            <RadioGroupItem value="yes" id="confirm-yes" className="hidden" />
+                            <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
+                              <span className="font-medium text-primary-dark">Oui</span>
+                            </Label>
+                          </div>
+                          <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.phoneConfirm ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.phoneConfirm === "no" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                            <RadioGroupItem value="no" id="confirm-no" className="hidden" />
+                            <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
+                              <span className="font-medium text-primary-dark">Non</span>
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                        {errors.phoneConfirm && (
+                          <p className="text-red-500 text-sm mt-2 text-center">{errors.phoneConfirm}</p>
+                        )}
+                      </>
                     ) : (
                       <div className="space-y-4 mt-6 animate-in fade-in-50 slide-in-from-bottom-5 duration-300">
                         <div className="bg-primary/10 p-5 rounded-lg border border-primary/20">
@@ -550,10 +696,17 @@ export default function StartForm() {
                         <h3 className="font-medium text-primary mb-3 text-center">Vous préférez être coaché par :</h3>
                         <RadioGroup
                           value={formData.coachGender}
-                          onValueChange={(value) => setFormData({ ...formData, coachGender: value })}
+                          onValueChange={(value) => {
+                            setFormData({ ...formData, coachGender: value });
+                            if (value) {
+                              const newErrors = { ...errors };
+                              delete newErrors.coachGender;
+                              setErrors(newErrors);
+                            }
+                          }}
                           className="grid grid-cols-3 gap-3"
                         >
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "female" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "female" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
                             <RadioGroupItem value="female" id="gender-female" className="hidden" />
                             <Label htmlFor="gender-female" className="flex flex-col items-center justify-center cursor-pointer w-full">
                               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
@@ -562,7 +715,7 @@ export default function StartForm() {
                               <span className="font-medium text-primary-dark">Une femme</span>
                             </Label>
                           </div>
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "male" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "male" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
                             <RadioGroupItem value="male" id="gender-male" className="hidden" />
                             <Label htmlFor="gender-male" className="flex flex-col items-center justify-center cursor-pointer w-full">
                               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
@@ -571,7 +724,7 @@ export default function StartForm() {
                               <span className="font-medium text-primary-dark">Un homme</span>
                             </Label>
                           </div>
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "any" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "any" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
                             <RadioGroupItem value="any" id="gender-any" className="hidden" />
                             <Label htmlFor="gender-any" className="flex flex-col items-center justify-center cursor-pointer w-full">
                               <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
@@ -581,15 +734,25 @@ export default function StartForm() {
                             </Label>
                           </div>
                         </RadioGroup>
+                        {errors.coachGender && (
+                          <p className="text-red-500 text-sm mt-2 text-center">{errors.coachGender}</p>
+                        )}
                       </div>
                       
                       <div className="flex items-start space-x-3 mt-4">
                         <Checkbox
                           id="consent"
                           checked={formData.consent}
-                          onCheckedChange={(checked) => setFormData({ ...formData, consent: checked as boolean })}
+                          onCheckedChange={(checked) => {
+                            setFormData({ ...formData, consent: checked as boolean });
+                            if (checked) {
+                              const newErrors = { ...errors };
+                              delete newErrors.consent;
+                              setErrors(newErrors);
+                            }
+                          }}
                           required
-                          className="mt-1 text-primary border-primary/50"
+                          className={`mt-1 text-primary border-primary/50 ${errors.consent ? 'border-red-500' : ''}`}
                         />
                         <div>
                           <Label htmlFor="consent" className="cursor-pointer font-medium text-primary">
@@ -598,6 +761,9 @@ export default function StartForm() {
                           <p className="text-sm text-primary-dark mt-1">
                             En cochant cette case, vous acceptez que Shape It utilise vos informations pour vous contacter concernant votre demande de Bilan Forme et vous envoyer des informations pertinentes sur nos services.
                           </p>
+                          {errors.consent && (
+                            <p className="text-red-500 text-sm mt-1">{errors.consent}</p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -618,13 +784,20 @@ export default function StartForm() {
                     
                     <RadioGroup
                       value={formData.source}
-                      onValueChange={(value) => setFormData({ ...formData, source: value })}
+                      onValueChange={(value) => {
+                        setFormData({ ...formData, source: value });
+                        if (value) {
+                          const newErrors = { ...errors };
+                          delete newErrors.source;
+                          setErrors(newErrors);
+                        }
+                      }}
                       className="space-y-3"
                     >
                       {sources.map((source) => (
                         <div 
                           key={source.id} 
-                          className={`flex items-center space-x-3 p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.source === source.id ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
+                          className={`flex items-center space-x-3 p-4 rounded-lg border ${errors.source ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.source === source.id ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
                         >
                           <RadioGroupItem value={source.id} id={source.id} className="text-primary" />
                           <Label htmlFor={source.id} className="cursor-pointer text-primary-dark">
@@ -633,6 +806,9 @@ export default function StartForm() {
                         </div>
                       ))}
                     </RadioGroup>
+                    {errors.source && (
+                      <p className="text-red-500 text-sm mt-2 text-center">{errors.source}</p>
+                    )}
                   </div>
                 )}
 
