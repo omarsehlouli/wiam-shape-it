@@ -184,7 +184,7 @@ export default function Page() {
             </div>
             <div className="grid md:grid-cols-2 gap-8 md:gap-10">
               {services.map((service, index) => (
-                <Card key={index} className="overflow-hidden border-0 rounded-xl shadow-elegant hover-lift">
+                <Card key={index} className="bg-primary-50 overflow-hidden border-0 rounded-xl shadow-elegant hover-lift">
                   <CardContent className="p-8 md:p-10">
                     <div className="mb-6 md:mb-8 flex justify-center">
                       <div className="w-16 h-16 md:w-20 md:h-20 bg-primary-50 rounded-full flex items-center justify-center">
@@ -192,7 +192,7 @@ export default function Page() {
                       </div>
                     </div>
                     <h3 className="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 text-center">{service.title}</h3>
-                    <p className="text-base md:text-lg text-white text-center leading-relaxed">{service.description}</p>
+                    <p className="text-base md:text-lg text-gray-700 text-center leading-relaxed">{service.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -210,7 +210,7 @@ export default function Page() {
             </div>
             <div className="grid md:grid-cols-3 gap-8 md:gap-10">
               {features.map((feature, index) => (
-                <Card key={index} className="overflow-hidden border-0 rounded-xl shadow-soft hover-lift">
+                <Card key={index} className="bg-primary-50 overflow-hidden border-0 rounded-xl shadow-soft hover-lift">
                   <CardContent className="p-8 md:p-10 flex flex-col items-center">
                     <div className="mb-6 md:mb-8">
                       <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center">
@@ -218,7 +218,7 @@ export default function Page() {
                       </div>
                     </div>
                     <h3 className="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 text-center">{feature.title}</h3>
-                    <p className="text-base md:text-lg text-white text-center leading-relaxed">{feature.description}</p>
+                    <p className="text-base md:text-lg text-gray-700 text-center leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
