@@ -12,7 +12,10 @@ import {
   faPhoneAlt, 
   faCheckCircle, 
   faQuestionCircle,
-  faEnvelope 
+  faEnvelope,
+  faFemale,
+  faMale,
+  faUserFriends
 } from '@fortawesome/free-solid-svg-icons'
 
 import { Button } from "@/components/ui/button"
@@ -48,6 +51,7 @@ export default function StartForm() {
     phoneConfirm: "",
     consent: false,
     source: "",
+    coachGender: "",
     submittedAt: ""
   })
   const [isEditingPhone, setIsEditingPhone] = useState(false)
@@ -96,7 +100,7 @@ export default function StartForm() {
         ...formData,
         submittedAt: new Date().toISOString()
       }
-      console.log(finalFormData)
+      console.log("Form Submitted:", finalFormData)
       
       // Save to localStorage for later email sending
       if (typeof window !== 'undefined') {
@@ -541,21 +545,60 @@ export default function StartForm() {
                       <p className="text-primary-dark">Veuillez confirmer que vous autorisez l'utilisation des informations recueillies pour vous contacter</p>
                     </div>
                     
-                    <div className="bg-primary/10 p-5 rounded-lg border border-primary/20 flex items-start space-x-3">
-                      <Checkbox
-                        id="consent"
-                        checked={formData.consent}
-                        onCheckedChange={(checked) => setFormData({ ...formData, consent: checked as boolean })}
-                        required
-                        className="mt-1 text-primary border-primary/50"
-                      />
+                    <div className="space-y-6 bg-primary/10 p-5 rounded-lg border border-primary/20">
                       <div>
-                        <Label htmlFor="consent" className="cursor-pointer font-medium text-primary">
-                          J'accepte les conditions
-                        </Label>
-                        <p className="text-sm text-primary-dark mt-1">
-                          En cochant cette case, vous acceptez que Shape It utilise vos informations pour vous contacter concernant votre demande de Bilan Forme et vous envoyer des informations pertinentes sur nos services.
-                        </p>
+                        <h3 className="font-medium text-primary mb-3 text-center">Vous préférez être coaché par :</h3>
+                        <RadioGroup
+                          value={formData.coachGender}
+                          onValueChange={(value) => setFormData({ ...formData, coachGender: value })}
+                          className="grid grid-cols-3 gap-3"
+                        >
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "female" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                            <RadioGroupItem value="female" id="gender-female" className="hidden" />
+                            <Label htmlFor="gender-female" className="flex flex-col items-center justify-center cursor-pointer w-full">
+                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
+                                <FontAwesomeIcon icon={faFemale} className="text-primary text-2xl" />
+                              </div>
+                              <span className="font-medium text-primary-dark">Une femme</span>
+                            </Label>
+                          </div>
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "male" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                            <RadioGroupItem value="male" id="gender-male" className="hidden" />
+                            <Label htmlFor="gender-male" className="flex flex-col items-center justify-center cursor-pointer w-full">
+                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
+                                <FontAwesomeIcon icon={faMale} className="text-primary text-2xl" />
+                              </div>
+                              <span className="font-medium text-primary-dark">Un homme</span>
+                            </Label>
+                          </div>
+                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border border-primary/30 transition-all hover:bg-primary/10 ${formData.coachGender === "any" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
+                            <RadioGroupItem value="any" id="gender-any" className="hidden" />
+                            <Label htmlFor="gender-any" className="flex flex-col items-center justify-center cursor-pointer w-full">
+                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
+                                <FontAwesomeIcon icon={faUserFriends} className="text-primary text-2xl" />
+                              </div>
+                              <span className="font-medium text-primary-dark">Peu importe</span>
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      
+                      <div className="flex items-start space-x-3 mt-4">
+                        <Checkbox
+                          id="consent"
+                          checked={formData.consent}
+                          onCheckedChange={(checked) => setFormData({ ...formData, consent: checked as boolean })}
+                          required
+                          className="mt-1 text-primary border-primary/50"
+                        />
+                        <div>
+                          <Label htmlFor="consent" className="cursor-pointer font-medium text-primary">
+                            J'accepte les conditions
+                          </Label>
+                          <p className="text-sm text-primary-dark mt-1">
+                            En cochant cette case, vous acceptez que Shape It utilise vos informations pour vous contacter concernant votre demande de Bilan Forme et vous envoyer des informations pertinentes sur nos services.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -633,9 +676,6 @@ export default function StartForm() {
               </div>
               
               <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme gratuit.</p>
-              <p className="text-primary-dark mb-8">
-                En attendant, nous vous invitons à découvrir les témoignages des clients qui nous ont fait confiance.
-              </p>
               
               <div className="flex items-center justify-center bg-primary/10 p-4 rounded-lg mb-8 border border-primary/20">
                 <FontAwesomeIcon icon={faEnvelope} className="text-primary mr-3" />
@@ -668,12 +708,6 @@ export default function StartForm() {
                   ))}
                 </div>
                 
-                <div className="mt-6 flex items-center space-x-3 bg-primary/20 p-4 rounded-lg border border-primary/30">
-                  <span className="text-orange-500 text-2xl">🎁</span>
-                  <span className="font-medium text-primary">
-                    EN BONUS : repartez avec un programme starter, adapté à vos objectifs
-                  </span>
-                </div>
               </div>
               
               <div className="mt-8">
