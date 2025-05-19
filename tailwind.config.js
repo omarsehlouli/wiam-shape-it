@@ -11,6 +11,9 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-poppins)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -21,6 +24,16 @@ module.exports = {
           DEFAULT: "#847B72",
           light: "#A69E96",
           dark: "#645E57",
+          50: "#F5F3F2",
+          100: "#E6E3E0",
+          200: "#CEC8C2",
+          300: "#B5ADA5",
+          400: "#9C9289",
+          500: "#847B72",
+          600: "#6B635C",
+          700: "#504B45",
+          800: "#36332F",
+          900: "#1B1A18",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -52,7 +65,22 @@ module.exports = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.06)',
+        'elegant': '0 10px 30px -3px rgba(0, 0, 0, 0.08)',
+        'sharp': '0 2px 8px -1px rgba(0, 0, 0, 0.12)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: 0, transform: 'translateY(10px)' },
+          '100%': { opacity: 1, transform: 'translateY(0)' },
+        },
+      },
     },
   },
+  plugins: [require("tailwindcss-animate")],
 }
 

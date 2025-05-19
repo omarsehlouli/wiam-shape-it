@@ -1,9 +1,15 @@
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Poppins } from "next/font/google"
 import "./globals.css"
-import type React from "react" // Added import for React
+import type React from "react"
+import { ThemeProvider } from "@/components/theme-provider"
+import { Analytics } from "@/components/analytics"
 
-const inter = Inter({ subsets: ["latin"] })
+const poppins = Poppins({ 
+  subsets: ["latin"],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-poppins',
+})
 
 export const metadata: Metadata = {
   title: "Shape It - no limits.",
@@ -21,12 +27,22 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/logo3.png" />
         <link rel="apple-touch-icon" href="/logo3.png" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body className={`${poppins.variable} font-sans antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Analytics />
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

@@ -85,63 +85,70 @@ export default function Page() {
   ]
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-gray-50">
       <SiteHeader />
       <main>
         {/* Hero Section */}
         <section
-          className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center bg-cover bg-center"
+          className="relative min-h-[85vh] flex items-center justify-center bg-cover bg-center bg-fixed"
           style={{
             backgroundImage: `url("/home.webp")`,
           }}
         >
-          <div className="absolute inset-0 bg-primary/70 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-primary/80 backdrop-blur-sm" />
           <div className="container relative z-10 mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center space-y-6">
-              <h1 className="text-3xl md:text-6xl font-bold tracking-tighter text-white">
+            <div className="max-w-3xl mx-auto text-center space-y-8 animate-fade-in">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white leading-tight">
                 Entrez dans un nouveau chapitre de votre vie
               </h1>
-              <p className="text-lg md:text-xl text-white/90">
+              <p className="text-xl md:text-2xl text-white/90 font-light">
                 Bienvenue chez Shape It, un studio privé dédié à votre évolution physique et mentale.
               </p>
               <Link href="/commencer">
-                <Button size="lg" className="bg-white hover:bg-gray-100 text-primary px-8 mt-4">
+                <Button size="lg" className="bg-white hover:bg-gray-100 text-primary font-medium rounded-full px-8 py-6 mt-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
                   Commencez Votre Parcours
                 </Button>
               </Link>
             </div>
           </div>
+          
+          <div className="absolute bottom-8 w-full flex justify-center animate-bounce">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </div>
         </section>
 
         {/* Coaching Redefined Section */}
-        <section className="py-12 md:py-20 bg-white">
+        <section className="py-20 md:py-28 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-primary text-center mb-8 md:mb-12">
+            <div className="max-w-md mx-auto text-center mb-16">
               <Image 
                 src="/logo1.png" 
                 alt="Shape It" 
-                width={300} 
-                height={100} 
-                className="mx-auto"
+                width={200} 
+                height={80} 
+                className="mx-auto mb-6"
               />
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="relative h-[250px] md:h-[400px]">
+              <div className="h-1 w-20 bg-primary mx-auto mb-6 rounded-full"></div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="relative h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-elegant transform md:translate-x-6 hover-lift">
                 <Image
                   src="/home.webp"
                   alt="Wiam Alibouch"
                   fill
-                  className="object-cover rounded-lg"
+                  className="object-cover"
                 />
               </div>
-              <div className="space-y-4 md:space-y-6">
-                <p className="text-base md:text-lg text-gray-700">
+              <div className="space-y-6 md:space-y-8">
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Bienvenue chez Shape It, un studio privé dédié à votre évolution physique et mentale. Ici, chaque détail est pensé pour vous offrir bien plus qu'un simple entraînement : une expérience sur-mesure, dans un cadre intime, exclusif et motivant.
                 </p>
-                <p className="text-base md:text-lg text-gray-700">
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Vous ne suivez pas un programme standard. Vous êtes accompagné(e), guidé(e), challengé(e) par des experts passionnés en coaching et en nutrition, qui s'adaptent à vos besoins, votre rythme, et votre quotidien.
                 </p>
-                <p className="text-base md:text-lg text-gray-700">
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Que vous souhaitiez sculpter votre corps, perdre du poids durablement, retrouver votre énergie ou repousser vos limites sportives, notre méthode unique vous propulse vers des résultats concrets, profonds et durables.
                 </p>
               </div>
@@ -150,18 +157,18 @@ export default function Page() {
         </section>
 
         {/* Challenges Section */}
-        <section className="py-12 md:py-20 bg-primary/10">
+        <section className="py-20 md:py-28 bg-primary-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-white bg-primary inline-block px-6 py-3 rounded-lg">
+            <div className="text-center mb-16">
+              <h2 className="inline-block text-3xl md:text-4xl font-bold text-white bg-gradient-to-r from-primary to-primary-dark px-8 py-4 rounded-2xl shadow-md">
                 Vous allez vous reconnaître si…
               </h2>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
               {challenges.map((challenge, index) => (
-                <div key={index} className="flex gap-4 bg-white p-4 rounded-lg shadow">
-                  <span className="text-3xl md:text-4xl font-bold text-primary">{challenge.number}</span>
-                  <p className="text-base md:text-lg text-gray-700">{challenge.text}</p>
+                <div key={index} className="flex gap-6 bg-white p-6 rounded-xl shadow-soft hover-lift">
+                  <span className="text-4xl md:text-5xl font-bold text-primary-dark">{challenge.number}</span>
+                  <p className="text-lg text-gray-700 self-center">{challenge.text}</p>
                 </div>
               ))}
             </div>
@@ -169,20 +176,23 @@ export default function Page() {
         </section>
 
         {/* Services Section */}
-        <section className="py-12 md:py-20 bg-white">
+        <section className="py-20 md:py-28 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-primary text-center mb-8 md:mb-12">Nos domaines d'expertise</h2>
-            <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold text-primary mb-6">Nos domaines d'expertise</h2>
+              <div className="h-1 w-20 bg-primary mx-auto"></div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8 md:gap-10">
               {services.map((service, index) => (
-                <Card key={index} className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all">
-                  <CardContent className="p-6 md:p-8">
-                    <div className="mb-4 md:mb-6 flex justify-center">
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                        <FontAwesomeIcon icon={service.icon} className="text-primary text-2xl md:text-3xl" />
+                <Card key={index} className="overflow-hidden border-0 rounded-xl shadow-elegant hover-lift">
+                  <CardContent className="p-8 md:p-10">
+                    <div className="mb-6 md:mb-8 flex justify-center">
+                      <div className="w-16 h-16 md:w-20 md:h-20 bg-primary-50 rounded-full flex items-center justify-center">
+                        <FontAwesomeIcon icon={service.icon} className="text-primary text-3xl md:text-4xl" />
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold text-primary mb-3 md:mb-4 text-center">{service.title}</h3>
-                    <p className="text-sm md:text-base text-gray-700 text-center">{service.description}</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 text-center">{service.title}</h3>
+                    <p className="text-base md:text-lg text-white text-center leading-relaxed">{service.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -191,24 +201,24 @@ export default function Page() {
         </section>
 
         {/* Features Section */}
-        <section className="py-12 md:py-20 bg-primary/10">
+        <section className="py-20 md:py-28 bg-primary-50">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-8 md:mb-12">
-              <h2 className="text-2xl md:text-4xl font-bold text-white bg-primary inline-block px-6 py-3 rounded-lg">
+            <div className="text-center mb-16">
+              <h2 className="inline-block text-3xl md:text-4xl font-bold text-white bg-gradient-to-r from-primary to-primary-dark px-8 py-4 rounded-2xl shadow-md">
                 Ce que nous vous apportons
               </h2>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+            <div className="grid md:grid-cols-3 gap-8 md:gap-10">
               {features.map((feature, index) => (
-                <Card key={index} className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-all">
-                  <CardContent className="p-6 md:p-8 flex flex-col items-center">
-                    <div className="mb-4 md:mb-6">
-                      <div className="w-12 h-12 md:w-14 md:h-14 bg-primary/10 rounded-full flex items-center justify-center">
-                        <FontAwesomeIcon icon={feature.icon} className="text-primary text-xl md:text-2xl" />
+                <Card key={index} className="overflow-hidden border-0 rounded-xl shadow-soft hover-lift">
+                  <CardContent className="p-8 md:p-10 flex flex-col items-center">
+                    <div className="mb-6 md:mb-8">
+                      <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center">
+                        <FontAwesomeIcon icon={feature.icon} className="text-primary text-2xl md:text-3xl" />
                       </div>
                     </div>
-                    <h3 className="text-lg md:text-xl font-bold text-primary mb-3 md:mb-4 text-center">{feature.title}</h3>
-                    <p className="text-sm md:text-base text-gray-700 text-center">{feature.description}</p>
+                    <h3 className="text-xl md:text-2xl font-bold text-primary mb-4 md:mb-6 text-center">{feature.title}</h3>
+                    <p className="text-base md:text-lg text-white text-center leading-relaxed">{feature.description}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -217,27 +227,30 @@ export default function Page() {
         </section>
 
         {/* Coach Section */}
-        <section className="py-12 md:py-20 bg-white">
+        <section className="py-20 md:py-28 bg-white">
           <div className="container mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl font-bold text-primary text-center mb-8 md:mb-12">Notre Coach</h2>
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="relative h-[300px] md:h-[500px]">
+            <div className="max-w-3xl mx-auto text-center mb-16">
+              <h2 className="text-3xl md:text-5xl font-bold text-primary mb-6">Notre Coach</h2>
+              <div className="h-1 w-20 bg-primary mx-auto"></div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="relative h-[400px] md:h-[600px] rounded-2xl overflow-hidden shadow-elegant transform md:translate-x-6 hover-lift order-1 md:order-1">
                 <Image
                   src="/home.webp"
                   alt="Wiam Alibouch"
                   fill
-                  className="object-cover rounded-lg"
+                  className="object-cover"
                 />
               </div>
-              <div className="space-y-4 md:space-y-6">
-                <h3 className="text-xl md:text-2xl font-bold text-primary">Wiam Alibouch</h3>
-                <p className="text-base md:text-lg text-gray-700">
+              <div className="space-y-6 md:space-y-8 order-2 md:order-2">
+                <h3 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-dark">Wiam Alibouch</h3>
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Coach en nutrition supportive et personal trainer certifiée, passionnée par la transformation humaine et le développement de soi. Depuis plus de trois ans, elle a accompagné plus de 1 200 femmes en ligne à se reconnecter à leur corps, à comprendre la nutrition, à aimer le sport et à reprendre le pouvoir sur leur vie.
                 </p>
-                <p className="text-base md:text-lg text-gray-700">
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Forte de cette expérience et d'une écoute attentive des besoins réels de ses clientes, elle fonde Shape It : un espace pensé pour guider chacun vers une transformation durable, dans un cadre premium et profondément humain.
                 </p>
-                <p className="text-base md:text-lg text-gray-700">
+                <p className="text-lg md:text-xl text-gray-700 font-light leading-relaxed">
                   Sa mission ? Apporter un réel changement, utile et impactant, au cœur de la société marocaine.
                 </p>
               </div>
@@ -246,23 +259,41 @@ export default function Page() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-12 md:py-20 bg-primary text-white">
+        <section className="py-20 md:py-28 bg-gradient-to-r from-primary-600 to-primary-800 text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-2xl md:text-4xl font-bold mb-4 md:mb-6">La promesse Shape It</h2>
-            <p className="text-base md:text-xl mb-6 md:mb-8 max-w-2xl mx-auto">
-              Rejoindre Shape It, c'est faire le choix d'un coaching qui vous respecte, qui vous pousse à progresser, et qui vous donne enfin les résultats que vous méritez.
-            </p>
-            <p className="text-base md:text-xl mb-6 md:mb-8 max-w-2xl mx-auto">
-              Et parce que nous croyons pleinement en notre méthode, nous vous offrons une garantie 100% satisfait ou remboursé : si vous suivez nos recommandations sans obtenir les résultats annoncés, nous vous restituons votre investissement. Sans condition.
-            </p>
-            <Link href="/commencer">
-              <Button size="lg" className="bg-white text-primary hover:bg-gray-100 w-full md:w-auto">
-                Commencer Maintenant
-              </Button>
-            </Link>
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-3xl md:text-5xl font-bold mb-8 md:mb-10">La promesse Shape It</h2>
+              <p className="text-xl md:text-2xl mb-8 md:mb-10 font-light leading-relaxed">
+                Rejoindre Shape It, c'est faire le choix d'un coaching qui vous respecte, qui vous pousse à progresser, et qui vous donne enfin les résultats que vous méritez.
+              </p>
+              <p className="text-xl md:text-2xl mb-10 md:mb-12 font-light leading-relaxed">
+                Et parce que nous croyons pleinement en notre méthode, nous vous offrons une garantie 100% satisfait ou remboursé : si vous suivez nos recommandations sans obtenir les résultats annoncés, nous vous restituons votre investissement. Sans condition.
+              </p>
+              <Link href="/commencer">
+                <Button size="lg" className="bg-white hover:bg-gray-100 text-primary-dark font-medium rounded-full px-10 py-7 text-lg hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  Commencer Maintenant
+                </Button>
+              </Link>
+            </div>
           </div>
         </section>
       </main>
+      
+      {/* Footer */}
+      <footer className="bg-primary-800 text-white py-8">
+        <div className="container mx-auto px-4 text-center">
+          <Image 
+            src="/logo1.png" 
+            alt="Shape It" 
+            width={120} 
+            height={40} 
+            className="h-10 w-auto mx-auto mb-4"
+          />
+          <p className="text-sm text-white/70">
+            © {new Date().getFullYear()} Shape It. Tous droits réservés.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
