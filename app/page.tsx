@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link"
 import Image from "next/image"
 import { SiteHeader } from "@/components/site-header"
@@ -84,6 +86,21 @@ export default function Page() {
     },
   ]
 
+  const handleScrollToNextSection = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const href = event.currentTarget.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const elementId = href.substring(1);
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }
+    }
+  };
+
   return (
     <div className="relative min-h-screen bg-gray-50">
       <SiteHeader />
@@ -112,7 +129,12 @@ export default function Page() {
             </div>
           </div>
           
-          <a href="#coaching-redefined-section" aria-label="Scroll to next section" className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer">
+          <a 
+            href="#coaching-redefined-section" 
+            aria-label="Scroll to next section" 
+            className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer"
+            onClick={handleScrollToNextSection}
+          >
             <div className="w-8 h-8 text-white">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -157,7 +179,12 @@ export default function Page() {
             </div>
           </div>
           
-          <a href="#coaching-redefined-section" aria-label="Scroll to next section" className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer">
+          <a 
+            href="#coaching-redefined-section" 
+            aria-label="Scroll to next section" 
+            className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer"
+            onClick={handleScrollToNextSection}
+          >
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>

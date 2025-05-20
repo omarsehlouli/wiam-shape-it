@@ -5,6 +5,11 @@ import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Analytics } from "@/components/analytics"
 
+// Font Awesome CSS and config
+import { config } from '@fortawesome/fontawesome-svg-core'
+import '@fortawesome/fontawesome-svg-core/styles.css'
+config.autoAddCss = false
+
 const poppins = Poppins({ 
   subsets: ["latin"],
   weight: ['300', '400', '500', '600', '700'],
