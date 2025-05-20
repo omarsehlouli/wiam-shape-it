@@ -90,7 +90,7 @@ export default function Page() {
       <main>
         {/* Hero Section */}
         <section
-          className="relative min-h-[85vh] flex items-center justify-center bg-cover bg-center bg-fixed"
+          className="relative min-h-[85vh] flex items-center justify-center bg-cover bg-center"
           style={{
             backgroundImage: `url("/home.webp")`,
           }}
