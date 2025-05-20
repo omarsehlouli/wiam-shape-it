@@ -112,15 +112,17 @@ export default function Page() {
             </div>
           </div>
           
-          <div className="absolute bottom-8 w-full flex justify-center animate-bounce">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </div>
+          <a href="#coaching-redefined-section" aria-label="Scroll to next section" className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer">
+            <div className="w-8 h-8 text-white">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </a>
         </section>
 
         {/* Coaching Redefined Section */}
-        <section className="py-20 md:py-28 bg-white">
+        <section id="coaching-redefined-section" className="py-20 md:py-28 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-md mx-auto text-center mb-16">
               <Image 
@@ -154,6 +156,12 @@ export default function Page() {
               </div>
             </div>
           </div>
+          
+          <a href="#coaching-redefined-section" aria-label="Scroll to next section" className="absolute bottom-8 w-full flex justify-center animate-bounce cursor-pointer">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
         </section>
 
         {/* Challenges Section */}
