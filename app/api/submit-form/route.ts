@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       secure: false,
       auth: {
         user: 'wiam@shape-it.ma',
-        pass: 'v8bi~A_Da8SWRRQ'
+        pass: 'A53588890!'
       },
       requireTLS: true,
       tls: {
