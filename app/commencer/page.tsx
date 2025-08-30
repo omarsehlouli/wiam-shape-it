@@ -167,6 +167,10 @@ export default function StartForm() {
           newErrors.source = "Veuillez indiquer comment vous avez connu Shape It";
         }
         break;
+        
+      case 8:
+        // No validation needed for the reminder step
+        break;
     }
     
     setErrors(newErrors);
@@ -176,7 +180,7 @@ export default function StartForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (isSubmitting && step === 7) return; // Prevent multiple submissions on the final step
+    if (isSubmitting && step === 8) return; // Prevent multiple submissions on the final step
 
     // Validate current step
     if (!validateStep(step)) {
@@ -189,7 +193,7 @@ export default function StartForm() {
       return;
     }
     
-    if (step < 7) {
+    if (step < 8) {
       setStep(step + 1)
     } else {
       // Handle form submission
@@ -217,7 +221,7 @@ export default function StartForm() {
           localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
         }
         
-        setStep(8) // Show thank you page
+        setStep(9) // Show thank you page
       } catch (error) {
         console.error('Error submitting form:', error);
         toast({
@@ -268,7 +272,7 @@ export default function StartForm() {
   }
 
   // Calculate progress percentage
-  const progressPercentage = ((step - 1) / 6) * 100
+  const progressPercentage = ((step - 1) / 7) * 100
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/30 to-primary/5">
@@ -281,7 +285,7 @@ export default function StartForm() {
             </Button>
           </Link>
         </div>
-        {step < 8 ? (
+        {step < 9 ? (
           <div className="mx-auto max-w-2xl">
             <div className="flex justify-center mb-8">
               <Image
@@ -303,7 +307,7 @@ export default function StartForm() {
               </div>
               <div className="flex justify-between mt-2 text-xs text-white font-medium">
                 <span>Début</span>
-                <span>Étape {step}/7</span>
+                <span>Étape {step}/8</span>
                 <span>Fin</span>
               </div>
             </div>
@@ -592,7 +596,7 @@ export default function StartForm() {
                       <h2 className="text-2xl font-bold text-primary">
                         Confirmation de contact
                       </h2>
-                      <p className="text-primary-dark">Pour accéder à votre Bilan Forme gratuit, veuillez nous confirmer votre numéro</p>
+                      <p className="text-primary-dark">Pour accéder à votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement), veuillez nous confirmer votre numéro</p>
                     </div>
                     
                     <div className="bg-primary/10 p-5 rounded-lg border border-primary/20 text-center mb-6">
@@ -817,6 +821,40 @@ export default function StartForm() {
                   </div>
                 )}
 
+                {step === 8 && (
+                  <div className="space-y-6">
+                    <div className="text-center space-y-2 mb-6">
+                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
+                        <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-3xl" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-primary">
+                        Rappel important
+                      </h2>
+                      <p className="text-primary-dark">Veuillez prendre note des informations suivantes avant de finaliser votre demande</p>
+                    </div>
+                    
+                    <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
+                        <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
+                          <p className="text-lg font-medium text-primary-dark">
+                            Suite à la forte demande, cette consultation coûte maintenant <span className="font-bold text-primary">500 DH</span>
+                          </p>
+                          <p className="text-sm text-primary-dark mt-2">
+                            ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <p className="text-primary-dark mb-4">
+                          En cliquant sur "Confirmer", vous acceptez cette condition tarifaire pour votre Bilan Forme.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-between pt-4 mt-6">
                   {step > 1 ? (
                     <Button
@@ -835,10 +873,10 @@ export default function StartForm() {
                   {!(step === 5 && isEditingPhone) && (
                   <Button
                     type="submit"
-                    disabled={isSubmitting && step === 7}
+                    disabled={isSubmitting && step === 8}
                     className={`bg-primary hover:bg-primary-dark text-white px-6 py-2 transition-all flex items-center ${step === 1 ? "w-full" : ""}`}
                   >
-                    {isSubmitting && step === 7 ? (
+                    {isSubmitting && step === 8 ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -848,8 +886,8 @@ export default function StartForm() {
                       </>
                     ) : (
                       <>
-                        <span>{step === 7 ? "Envoyer" : "Suivant"}</span>
-                        {step !== 7 && <ArrowRight className="h-4 w-4 ml-2" />}
+                        <span>{step === 8 ? "Confirmer" : "Suivant"}</span>
+                        {step !== 8 && <ArrowRight className="h-4 w-4 ml-2" />}
                       </>
                     )}
                   </Button>
@@ -869,7 +907,7 @@ export default function StartForm() {
                 <p className="text-sm text-primary-dark mt-1">Votre formulaire a été envoyé avec succès</p>
               </div>
               
-              <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme gratuit.</p>
+              <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement).</p>
               
               <div className="flex items-center justify-center bg-primary/10 p-4 rounded-lg mb-8 border border-primary/20">
                 <FontAwesomeIcon icon={faEnvelope} className="text-primary mr-3" />
