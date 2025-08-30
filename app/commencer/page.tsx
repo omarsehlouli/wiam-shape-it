@@ -116,6 +116,10 @@ export default function StartForm() {
         break;
       
       case 2:
+        // No validation needed for pricing info step
+        break;
+      
+      case 3:
         if (!formData.birthDate.day || !formData.birthDate.month || !formData.birthDate.year) {
           newErrors.birthDate = "La date de naissance complète est requise";
         } else {
@@ -135,25 +139,25 @@ export default function StartForm() {
         }
         break;
       
-      case 3:
+      case 4:
         if (!formData.center) {
           newErrors.center = "Veuillez sélectionner une option";
         }
         break;
         
-      case 4:
+      case 5:
         if (formData.goals.length === 0) {
           newErrors.goals = "Veuillez sélectionner au moins un objectif";
         }
         break;
         
-      case 5:
+      case 6:
         if (!formData.phoneConfirm && !isEditingPhone) {
           newErrors.phoneConfirm = "Veuillez confirmer votre numéro de téléphone";
         }
         break;
         
-      case 6:
+      case 7:
         if (!formData.coachGender) {
           newErrors.coachGender = "Veuillez sélectionner une préférence de coach";
         }
@@ -162,13 +166,13 @@ export default function StartForm() {
         }
         break;
         
-      case 7:
+      case 8:
         if (!formData.source) {
           newErrors.source = "Veuillez indiquer comment vous avez connu Shape It";
         }
         break;
         
-      case 8:
+      case 9:
         // No validation needed for the reminder step
         break;
     }
@@ -180,7 +184,7 @@ export default function StartForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (isSubmitting && step === 8) return; // Prevent multiple submissions on the final step
+    if (isSubmitting && step === 9) return; // Prevent multiple submissions on the final step
 
     // Validate current step
     if (!validateStep(step)) {
@@ -193,7 +197,7 @@ export default function StartForm() {
       return;
     }
     
-    if (step < 8) {
+    if (step < 9) {
       setStep(step + 1)
     } else {
       // Handle form submission
@@ -221,7 +225,7 @@ export default function StartForm() {
           localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
         }
         
-        setStep(9) // Show thank you page
+        setStep(10) // Show thank you page
       } catch (error) {
         console.error('Error submitting form:', error);
         toast({
@@ -271,8 +275,8 @@ export default function StartForm() {
     return country || countries[0]; // Default to first country if not found
   }
 
-  // Calculate progress percentage
-  const progressPercentage = ((step - 1) / 7) * 100
+  // Calculate progress percentage  
+  const progressPercentage = ((step - 1) / 8) * 100
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/30 to-primary/5">
@@ -285,7 +289,7 @@ export default function StartForm() {
             </Button>
           </Link>
         </div>
-        {step < 9 ? (
+        {step < 10 ? (
           <div className="mx-auto max-w-2xl">
             <div className="flex justify-center mb-8">
               <Image
@@ -307,7 +311,7 @@ export default function StartForm() {
               </div>
               <div className="flex justify-between mt-2 text-xs text-white font-medium">
                 <span>Début</span>
-                <span>Étape {step}/8</span>
+                <span>Étape {step}/9</span>
                 <span>Fin</span>
               </div>
             </div>
@@ -410,6 +414,55 @@ export default function StartForm() {
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
+                        <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-3xl" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-primary">
+                        Parfait {formData.firstName} !
+                      </h2>
+                      <p className="text-primary-dark">Voici ce que comprend votre Bilan Forme complet</p>
+                    </div>
+                    
+                    <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
+                      <div className="text-center mb-4">
+                        <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
+                        <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
+                          <p className="text-lg font-medium text-primary-dark">
+                            Cette consultation coûte <span className="font-bold text-primary">500 DH</span>
+                          </p>
+                          <p className="text-sm text-primary-dark mt-2">
+                            ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3 mt-6">
+                        <h4 className="text-lg font-bold text-primary text-center">Ce que vous recevrez :</h4>
+                        <div className="grid gap-2">
+                          {[
+                            "1h dédiée pour votre scan de progression",
+                            "Tests avancés personnalisés",
+                            "Analyse complète masse grasse/masse musculaire",
+                            "Évaluation posturale détaillée",
+                            "Calcul métabolisme basal",
+                            "Test de condition physique",
+                            "Définition précise de vos objectifs",
+                            "Plan d'action sur mesure",
+                          ].map((item, index) => (
+                            <div key={index} className="flex items-center space-x-3 bg-white/80 p-3 rounded-lg shadow-sm border border-primary/10">
+                              <CheckSquare className="h-4 w-4 text-primary flex-shrink-0" />
+                              <span className="text-sm text-primary-dark">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 3 && (
+                  <div className="space-y-6">
+                    <div className="text-center space-y-2 mb-6">
+                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
                         <FontAwesomeIcon icon={faCalendar} className="text-primary text-3xl" />
                       </div>
                       <h2 className="text-2xl font-bold text-primary">
@@ -478,7 +531,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 3 && (
+                {step === 4 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -532,7 +585,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 4 && (
+                {step === 5 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -587,7 +640,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 5 && (
+                {step === 6 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -688,7 +741,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 6 && (
+                {step === 7 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -779,7 +832,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 7 && (
+                {step === 8 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -821,7 +874,7 @@ export default function StartForm() {
                   </div>
                 )}
 
-                {step === 8 && (
+                {step === 9 && (
                   <div className="space-y-6">
                     <div className="text-center space-y-2 mb-6">
                       <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
@@ -838,7 +891,7 @@ export default function StartForm() {
                         <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
                         <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
                           <p className="text-lg font-medium text-primary-dark">
-                            Suite à la forte demande, cette consultation coûte maintenant <span className="font-bold text-primary">500 DH</span>
+                            Cette consultation coûte <span className="font-bold text-primary">500 DH</span>
                           </p>
                           <p className="text-sm text-primary-dark mt-2">
                             ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
@@ -870,13 +923,13 @@ export default function StartForm() {
                     <div></div> // Empty div for spacing when no back button
                   )}
                   
-                  {!(step === 5 && isEditingPhone) && (
+                  {!(step === 6 && isEditingPhone) && (
                   <Button
                     type="submit"
-                    disabled={isSubmitting && step === 8}
+                    disabled={isSubmitting && step === 9}
                     className={`bg-primary hover:bg-primary-dark text-white px-6 py-2 transition-all flex items-center ${step === 1 ? "w-full" : ""}`}
                   >
-                    {isSubmitting && step === 8 ? (
+                    {isSubmitting && step === 9 ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -886,8 +939,8 @@ export default function StartForm() {
                       </>
                     ) : (
                       <>
-                        <span>{step === 8 ? "Confirmer" : "Suivant"}</span>
-                        {step !== 8 && <ArrowRight className="h-4 w-4 ml-2" />}
+                        <span>{step === 9 ? "Confirmer" : "Suivant"}</span>
+                        {step !== 9 && <ArrowRight className="h-4 w-4 ml-2" />}
                       </>
                     )}
                   </Button>
