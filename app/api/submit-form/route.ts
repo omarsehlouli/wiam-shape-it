@@ -81,7 +81,7 @@ export async function POST(request: Request) {
       
       <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #f0ad4e;">
         <h3 style="color: #8a6d3b; margin-top: 0;">💰 Information Tarification</h3>
-        <p style="margin-bottom: 0; color: #8a6d3b;"><strong>Cette consultation coûte maintenant 500 DH</strong> (suite à la forte demande). Cette somme sera entièrement déduite des tarifs si le client s'engage.</p>
+        <p style="margin-bottom: 0; color: #8a6d3b;"><strong>Cette consultation coûte 500 DH</strong>. Cette somme sera entièrement déduite des tarifs si le client s'engage.</p>
       </div>
       
       <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
       
       <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f0ad4e;">
         <h3 style="color: #8a6d3b; margin-top: 0;">💰 Information Tarification</h3>
-        <p style="margin-bottom: 0; color: #8a6d3b;">Suite à la forte demande, cette consultation coûte maintenant <strong>500 DH</strong>. Cette somme sera <strong>entièrement déduite</strong> de vos tarifs si vous décidez de vous engager avec nous.</p>
+        <p style="margin-bottom: 0; color: #8a6d3b;">Cette consultation coûte <strong>500 DH</strong>. Cette somme sera <strong>entièrement déduite</strong> de vos tarifs si vous décidez de vous engager avec nous.</p>
       </div>
       
       <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 20px 0;">
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
 Nouvelle demande de Bilan Forme
 
 💰 INFORMATION TARIFICATION
-Cette consultation coûte maintenant 500 DH (suite à la forte demande). 
+Cette consultation coûte 500 DH. 
 Cette somme sera entièrement déduite des tarifs si le client s'engage.
 
 INFORMATIONS PERSONNELLES
@@ -203,7 +203,7 @@ Bonjour ${formData.firstName},
 Nous vous confirmons la réception de votre demande de Bilan Forme. Merci de nous faire confiance pour vous accompagner dans votre parcours fitness !
 
 💰 INFORMATION TARIFICATION
-Suite à la forte demande, cette consultation coûte maintenant 500 DH. 
+Cette consultation coûte 500 DH. 
 Cette somme sera entièrement déduite de vos tarifs si vous décidez de vous engager avec nous.
 
 VOTRE BILAN FORME COMPREND :

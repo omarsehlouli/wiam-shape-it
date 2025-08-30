@@ -838,7 +838,7 @@ export default function StartForm() {
                         <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
                         <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
                           <p className="text-lg font-medium text-primary-dark">
-                            Suite à la forte demande, cette consultation coûte maintenant <span className="font-bold text-primary">500 DH</span>
+                            Cette consultation coûte <span className="font-bold text-primary">500 DH</span>
                           </p>
                           <p className="text-sm text-primary-dark mt-2">
                             ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
