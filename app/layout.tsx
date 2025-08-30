@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Poppins } from "next/font/google"
+// import { Poppins } from "next/font/google"
 import "./globals.css"
 import type React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -10,11 +10,11 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import '@fortawesome/fontawesome-svg-core/styles.css'
 config.autoAddCss = false
 
-const poppins = Poppins({ 
-  subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-poppins',
-})
+// const poppins = Poppins({ 
+//   subsets: ["latin"],
+//   weight: ['300', '400', '500', '600', '700'],
+//   variable: '--font-poppins',
+// })
 
 export const metadata: Metadata = {
   title: "Shape It - no limits.",
@@ -37,7 +37,7 @@ export default function RootLayout({
         <link rel="icon" href="/logo3.png" />
         <link rel="apple-touch-icon" href="/logo3.png" />
       </head>
-      <body className={`${poppins.variable} font-sans antialiased`}>
+      <body className={`font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
