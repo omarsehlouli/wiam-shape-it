@@ -79,11 +79,6 @@ export async function POST(request: Request) {
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 5px;">
       <h1 style="color: #847B72; text-align: center; margin-bottom: 30px;">Nouvelle demande de Bilan Forme</h1>
       
-      <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #f0ad4e;">
-        <h3 style="color: #8a6d3b; margin-top: 0;">💰 Information Tarification</h3>
-        <p style="margin-bottom: 0; color: #8a6d3b;"><strong>Cette consultation coûte 500 DH</strong>. Cette somme sera entièrement déduite des tarifs si le client s'engage.</p>
-      </div>
-      
       <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
         <h2 style="color: #847B72; border-bottom: 1px solid #ddd; padding-bottom: 10px;">Informations personnelles</h2>
         <p><strong>Nom complet:</strong> ${formData.firstName} ${formData.lastName}</p>
@@ -127,11 +122,6 @@ export async function POST(request: Request) {
         Nous vous confirmons la réception de votre demande de Bilan Forme. Merci de nous faire confiance pour vous accompagner dans votre parcours fitness !
       </p>
       
-      <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #f0ad4e;">
-        <h3 style="color: #8a6d3b; margin-top: 0;">💰 Information Tarification</h3>
-        <p style="margin-bottom: 0; color: #8a6d3b;">Cette consultation coûte <strong>500 DH</strong>. Cette somme sera <strong>entièrement déduite</strong> de vos tarifs si vous décidez de vous engager avec nous.</p>
-      </div>
-      
       <div style="background-color: #f7f7f7; padding: 15px; border-radius: 5px; margin: 20px 0;">
         <h2 style="color: #847B72; border-bottom: 1px solid #ddd; padding-bottom: 10px; font-size: 18px;">Votre Bilan Forme comprend :</h2>
         <ul style="padding-left: 20px; line-height: 1.6;">
@@ -147,7 +137,7 @@ export async function POST(request: Request) {
       </div>
       
       <p style="font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
-        Notre équipe vous contactera très prochainement pour planifier votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement) au <strong>${centerLabel}</strong>.
+        Notre équipe vous contactera très prochainement pour planifier votre Bilan Forme au <strong>${centerLabel}</strong>.
       </p>
       
       <p style="font-size: 16px; line-height: 1.5; margin-bottom: 15px;">
@@ -172,10 +162,6 @@ export async function POST(request: Request) {
     // Format the plain text for email
     const textContent = `
 Nouvelle demande de Bilan Forme
-
-💰 INFORMATION TARIFICATION
-Cette consultation coûte 500 DH. 
-Cette somme sera entièrement déduite des tarifs si le client s'engage.
 
 INFORMATIONS PERSONNELLES
 -------------------------
@@ -202,10 +188,6 @@ Bonjour ${formData.firstName},
 
 Nous vous confirmons la réception de votre demande de Bilan Forme. Merci de nous faire confiance pour vous accompagner dans votre parcours fitness !
 
-💰 INFORMATION TARIFICATION
-Cette consultation coûte 500 DH. 
-Cette somme sera entièrement déduite de vos tarifs si vous décidez de vous engager avec nous.
-
 VOTRE BILAN FORME COMPREND :
 - 1h dédiée pour effectuer votre scan de progression accéléré
 - Tests avancés
@@ -216,7 +198,7 @@ VOTRE BILAN FORME COMPREND :
 - Définition précise des objectifs
 - Création d'un plan d'action sur mesure
 
-Notre équipe vous contactera très prochainement pour planifier votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement) au ${centerLabel}.
+Notre équipe vous contactera très prochainement pour planifier votre Bilan Forme au ${centerLabel}.
 
 Si vous avez des questions, n'hésitez pas à nous contacter.
 
@@ -232,7 +214,7 @@ info@shape-it.ma | shape-it.ma
     const emailResult = await transporter.sendMail({
       from: 'Shape It <wiam@shape-it.ma>',
       to: 'wiam@shape-it.ma',
-      subject: `Nouvelle demande de Bilan Forme (consultation 500 DH) - ${formData.firstName} ${formData.lastName}`,
+      subject: `Nouvelle demande de Bilan Forme - ${formData.firstName} ${formData.lastName}`,
       text: textContent,
       html: htmlContent
     });
@@ -241,7 +223,7 @@ info@shape-it.ma | shape-it.ma
     const clientEmailResult = await transporter.sendMail({
       from: 'Shape It <wiam@shape-it.ma>',
       to: formData.email,
-      subject: `Confirmation de votre demande - Bilan Forme (500 DH) - Shape It`,
+      subject: `Confirmation de votre demande - Bilan Forme - Shape It`,
       text: clientTextContent,
       html: clientHtmlContent
     });
