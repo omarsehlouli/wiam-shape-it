@@ -423,18 +423,6 @@ export default function StartForm() {
                     </div>
                     
                     <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
-                      <div className="text-center mb-4">
-                        <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
-                        <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
-                          <p className="text-lg font-medium text-primary-dark">
-                            Cette consultation coûte <span className="font-bold text-primary">500 DH</span>
-                          </p>
-                          <p className="text-sm text-primary-dark mt-2">
-                            ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
-                          </p>
-                        </div>
-                      </div>
-                      
                       <div className="space-y-3 mt-6">
                         <h4 className="text-lg font-bold text-primary text-center">Ce que vous recevrez :</h4>
                         <div className="grid gap-2">
@@ -649,7 +637,7 @@ export default function StartForm() {
                       <h2 className="text-2xl font-bold text-primary">
                         Confirmation de contact
                       </h2>
-                      <p className="text-primary-dark">Pour accéder à votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement), veuillez nous confirmer votre numéro</p>
+                      <p className="text-primary-dark">Pour accéder à votre Bilan Forme, veuillez nous confirmer votre numéro</p>
                     </div>
                     
                     <div className="bg-primary/10 p-5 rounded-lg border border-primary/20 text-center mb-6">
@@ -887,21 +875,9 @@ export default function StartForm() {
                     </div>
                     
                     <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
-                      <div className="text-center mb-4">
-                        <h3 className="text-xl font-bold text-primary mb-2">💰 Information Tarification</h3>
-                        <div className="bg-white/80 p-4 rounded-lg border border-primary/20">
-                          <p className="text-lg font-medium text-primary-dark">
-                            Cette consultation coûte <span className="font-bold text-primary">500 DH</span>
-                          </p>
-                          <p className="text-sm text-primary-dark mt-2">
-                            ✨ Cette somme sera <span className="font-semibold">entièrement déduite</span> de vos tarifs si vous décidez de vous engager avec nous
-                          </p>
-                        </div>
-                      </div>
-                      
                       <div className="text-center">
                         <p className="text-primary-dark mb-4">
-                          En cliquant sur "Confirmer", vous acceptez cette condition tarifaire pour votre Bilan Forme.
+                          En cliquant sur "Confirmer", vous finalisez votre demande de Bilan Forme.
                         </p>
                       </div>
                     </div>
@@ -960,7 +936,7 @@ export default function StartForm() {
                 <p className="text-sm text-primary-dark mt-1">Votre formulaire a été envoyé avec succès</p>
               </div>
               
-              <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme (500 DH qui seront déduits du tarifs si engagement).</p>
+              <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme.</p>
               
               <div className="flex items-center justify-center bg-primary/10 p-4 rounded-lg mb-8 border border-primary/20">
                 <FontAwesomeIcon icon={faEnvelope} className="text-primary mr-3" />
