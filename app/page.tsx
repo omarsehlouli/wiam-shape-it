@@ -90,8 +90,8 @@ export default function Page() {
               className="absolute inset-0 w-full h-full object-cover"
               style={{ filter: 'blur(30px) brightness(0.25)', transform: 'scale(1.2)' }}
             >
-              <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.webm" type="video/webm" />
-              <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.mp4" type="video/mp4" />
+              <source src="/videos/copy_7B5710B6.webm" type="video/webm" />
+              <source src="/videos/copy_7B5710B6.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/50" />
             
@@ -128,8 +128,8 @@ export default function Page() {
             className="absolute inset-0 w-full h-full object-cover scale-105"
             style={{ filter: 'brightness(0.4)' }}
           >
-            <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.webm" type="video/webm" />
-            <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.mp4" type="video/mp4" />
+            <source src="/videos/copy_7B5710B6.webm" type="video/webm" />
+            <source src="/videos/copy_7B5710B6.mp4" type="video/mp4" />
           </video>
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-primary-900/80" />
