@@ -26,10 +26,10 @@ export default function Page() {
   const showcaseRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const showcaseVideos = [
-    { webm: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.webm", mp4: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.mp4", label: "Entraînement" },
-    { webm: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm", mp4: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4", label: "Coaching" },
-    { webm: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.webm", mp4: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.mp4", label: "Transformation" },
-    { webm: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.webm", mp4: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.mp4", label: "Résultats" },
+    { webm: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.webm", mp4: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.mp4", poster: "/videos/thumb_0E8EA4DC.jpg", label: "Entraînement" },
+    { webm: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm", mp4: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4", poster: "/videos/thumb_9282FAA2.jpg", label: "Coaching" },
+    { webm: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.webm", mp4: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.mp4", poster: "/videos/thumb_6B70F7FF.jpg", label: "Transformation" },
+    { webm: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.webm", mp4: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.mp4", poster: "/videos/thumb_EFD42330.jpg", label: "Résultats" },
   ]
 
   // Intro: show logo, then fade out (no lift)
@@ -242,7 +242,8 @@ export default function Page() {
                 >
                   <video
                     ref={(el) => { showcaseRefs.current[index] = el }}
-                    muted loop playsInline preload="metadata"
+                    muted loop playsInline preload="none"
+                    poster={video.poster}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   >
                     <source src={video.webm} type="video/webm" />
