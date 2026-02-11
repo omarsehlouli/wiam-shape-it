@@ -26,10 +26,9 @@ export default function Page() {
   const showcaseRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const showcaseVideos = [
-    { webm: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.webm", mp4: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.mp4", poster: "/videos/thumb_0E8EA4DC.jpg", label: "Entraînement" },
-    { webm: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm", mp4: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4", poster: "/videos/thumb_9282FAA2.jpg", label: "Coaching" },
-    { webm: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.webm", mp4: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.mp4", poster: "/videos/thumb_6B70F7FF.jpg", label: "Transformation" },
-    { webm: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.webm", mp4: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.mp4", poster: "/videos/thumb_EFD42330.jpg", label: "Résultats" },
+    { webm: "/videos/copy_0E8EA4DC.webm", mp4: "/videos/copy_0E8EA4DC.mp4", poster: "/videos/thumb_0E8EA4DC.jpg", label: "Entraînement" },
+    { webm: "/videos/copy_9282FAA2.webm", mp4: "/videos/copy_9282FAA2.mp4", poster: "/videos/thumb_9282FAA2.jpg", label: "Coaching" },
+    { webm: "/videos/copy_EFD42330.webm", mp4: "/videos/copy_EFD42330.mp4", poster: "/videos/thumb_EFD42330.jpg", label: "Résultats" },
   ]
 
   // Intro: show logo, then fade out (no lift)
@@ -227,7 +226,7 @@ export default function Page() {
               <div className="h-px w-16 bg-gradient-to-r from-transparent via-white/20 to-transparent mx-auto mt-8" />
             </motion.div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {showcaseVideos.map((video, index) => (
                 <motion.div
                   key={index}
@@ -495,8 +494,8 @@ export default function Page() {
         {/* ===== CTA ===== */}
         <section className="relative py-28 md:py-36 overflow-hidden">
           <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'brightness(0.2)' }}>
-            <source src="/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm" type="video/webm" />
-            <source src="/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4" type="video/mp4" />
+            <source src="/videos/copy_9282FAA2.webm" type="video/webm" />
+            <source src="/videos/copy_9282FAA2.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-primary-900/60 via-primary-800/40 to-primary-900/70" />
           
