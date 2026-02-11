@@ -71,12 +71,17 @@ module.exports = {
         'sharp': '0 2px 8px -1px rgba(0, 0, 0, 0.12)',
       },
       animation: {
-        'fade-in': 'fadeIn 0.6s ease-in-out',
+        'fade-in': 'fadeIn 0.8s ease-out forwards',
+        'scale-in': 'scaleIn 1.2s ease-out forwards',
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: 0, transform: 'translateY(10px)' },
-          '100%': { opacity: 1, transform: 'translateY(0)' },
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(1.1)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
     },
