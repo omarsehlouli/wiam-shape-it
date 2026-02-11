@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { CheckSquare, ThumbsUp, ArrowLeft, ArrowRight, Phone } from "lucide-react"
+import { CheckSquare, ArrowLeft, ArrowRight, Sparkles } from "lucide-react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { 
   faCalendar, 
@@ -12,16 +12,15 @@ import {
   faPhoneAlt, 
   faCheckCircle, 
   faQuestionCircle,
-  faEnvelope,
   faFemale,
   faMale,
   faUserFriends
 } from '@fortawesome/free-solid-svg-icons'
+import { motion, AnimatePresence } from "motion/react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "@/components/ui/use-toast"
@@ -30,22 +29,21 @@ const countries = [
   { code: "MA", name: "Morocco", flag: "🇲🇦", dialCode: "+212" },
   { code: "FR", name: "France", flag: "🇫🇷", dialCode: "+33" },
   { code: "BE", name: "Belgium", flag: "🇧🇪", dialCode: "+32" },
-  // Add more countries as needed
 ]
 
 export default function StartForm() {
   const [step, setStep] = useState(1)
+  const [direction, setDirection] = useState(1)
+  const [showSplash, setShowSplash] = useState(true)
+  const [splashFading, setSplashFading] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     phone: "",
     countryCode: "MA",
     email: "",
-    birthDate: {
-      month: "",
-      day: "",
-      year: "",
-    },
+    birthDate: { month: "", day: "", year: "" },
     center: "",
     goals: [] as string[],
     phoneConfirm: "",
@@ -59,20 +57,25 @@ export default function StartForm() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Save form data to localStorage whenever it changes
+  // Splash: video + logo play together, then fade out
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('shapeItFormData', JSON.stringify(formData));
+    const fadeOut = () => {
+      setSplashFading(true)
+      setTimeout(() => setShowSplash(false), 1000)
     }
-  }, [formData]);
+    const vid = videoRef.current
+    if (vid) {
+      vid.addEventListener('ended', fadeOut)
+      const fallback = setTimeout(fadeOut, 3000)
+      return () => { vid.removeEventListener('ended', fadeOut); clearTimeout(fallback) }
+    }
+    const fallback = setTimeout(fadeOut, 3000)
+    return () => clearTimeout(fallback)
+  }, [])
 
-  const centers = [
-    {
-      id: "ain-diab",
-      name: "SHAPE IT",
-      address: "boulevard de La grande ceinture, Ain Diab, Casablanca",
-    },
-  ]
+  useEffect(() => {
+    if (typeof window !== 'undefined') localStorage.setItem('shapeItFormData', JSON.stringify(formData))
+  }, [formData])
 
   const goals = [
     { id: "weight-loss", label: "Perte de Poids" },
@@ -93,898 +96,561 @@ export default function StartForm() {
   ]
 
   const validateStep = (currentStep: number): boolean => {
-    const newErrors: { [key: string]: string } = {};
-    
+    const newErrors: { [key: string]: string } = {}
     switch (currentStep) {
       case 1:
-        if (!formData.firstName.trim()) {
-          newErrors.firstName = "Le prénom est requis";
-        }
-        if (!formData.lastName.trim()) {
-          newErrors.lastName = "Le nom est requis";
-        }
-        if (!formData.phone.trim()) {
-          newErrors.phone = "Le numéro de téléphone est requis";
-        } else if (!/^\d{8,12}$/.test(formData.phone.trim())) {
-          newErrors.phone = "Veuillez entrer un numéro de téléphone valide";
-        }
-        if (!formData.email.trim()) {
-          newErrors.email = "L'email est requis";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
-          newErrors.email = "Veuillez entrer une adresse email valide";
-        }
-        break;
-      
-      case 2:
-        // No validation needed for pricing info step
-        break;
-      
+        if (!formData.firstName.trim()) newErrors.firstName = "Le prénom est requis"
+        if (!formData.lastName.trim()) newErrors.lastName = "Le nom est requis"
+        if (!formData.phone.trim()) newErrors.phone = "Le numéro de téléphone est requis"
+        else if (!/^\d{8,12}$/.test(formData.phone.trim())) newErrors.phone = "Veuillez entrer un numéro de téléphone valide"
+        if (!formData.email.trim()) newErrors.email = "L'email est requis"
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) newErrors.email = "Veuillez entrer une adresse email valide"
+        break
       case 3:
         if (!formData.birthDate.day || !formData.birthDate.month || !formData.birthDate.year) {
-          newErrors.birthDate = "La date de naissance complète est requise";
+          newErrors.birthDate = "La date de naissance complète est requise"
         } else {
-          const day = parseInt(formData.birthDate.day);
-          const month = parseInt(formData.birthDate.month);
-          const year = parseInt(formData.birthDate.year);
-          
-          if (isNaN(day) || day < 1 || day > 31) {
-            newErrors.birthDate = "Jour invalide";
-          }
-          if (isNaN(month) || month < 1 || month > 12) {
-            newErrors.birthDate = "Mois invalide";
-          }
-          if (isNaN(year) || year < 1940 || year > new Date().getFullYear() - 16) {
-            newErrors.birthDate = "Année invalide";
-          }
+          const day = parseInt(formData.birthDate.day), month = parseInt(formData.birthDate.month), year = parseInt(formData.birthDate.year)
+          if (isNaN(day) || day < 1 || day > 31) newErrors.birthDate = "Jour invalide"
+          if (isNaN(month) || month < 1 || month > 12) newErrors.birthDate = "Mois invalide"
+          if (isNaN(year) || year < 1940 || year > new Date().getFullYear() - 16) newErrors.birthDate = "Année invalide"
         }
-        break;
-      
+        break
       case 4:
-        if (!formData.center) {
-          newErrors.center = "Veuillez sélectionner une option";
-        }
-        break;
-        
+        if (!formData.center) newErrors.center = "Veuillez sélectionner une option"
+        break
       case 5:
-        if (formData.goals.length === 0) {
-          newErrors.goals = "Veuillez sélectionner au moins un objectif";
-        }
-        break;
-        
+        if (formData.goals.length === 0) newErrors.goals = "Veuillez sélectionner au moins un objectif"
+        break
       case 6:
-        if (!formData.phoneConfirm && !isEditingPhone) {
-          newErrors.phoneConfirm = "Veuillez confirmer votre numéro de téléphone";
-        }
-        break;
-        
+        if (!formData.phoneConfirm && !isEditingPhone) newErrors.phoneConfirm = "Veuillez confirmer votre numéro de téléphone"
+        break
       case 7:
-        if (!formData.coachGender) {
-          newErrors.coachGender = "Veuillez sélectionner une préférence de coach";
-        }
-        if (!formData.consent) {
-          newErrors.consent = "Vous devez accepter les conditions pour continuer";
-        }
-        break;
-        
+        if (!formData.coachGender) newErrors.coachGender = "Veuillez sélectionner une préférence de coach"
+        if (!formData.consent) newErrors.consent = "Vous devez accepter les conditions pour continuer"
+        break
       case 8:
-        if (!formData.source) {
-          newErrors.source = "Veuillez indiquer comment vous avez connu Shape It";
-        }
-        break;
-        
-      case 9:
-        // No validation needed for the reminder step
-        break;
+        if (!formData.source) newErrors.source = "Veuillez indiquer comment vous avez connu Shape It"
+        break
     }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (isSubmitting && step === 9) return; // Prevent multiple submissions on the final step
-
-    // Validate current step
+    if (isSubmitting && step === 9) return
     if (!validateStep(step)) {
-      // Display toast notification for error
-      toast({
-        title: "Formulaire incomplet",
-        description: "Veuillez remplir tous les champs requis pour continuer.",
-        variant: "destructive",
-      });
-      return;
+      toast({ title: "Formulaire incomplet", description: "Veuillez remplir tous les champs requis.", variant: "destructive" })
+      return
     }
-    
     if (step < 9) {
+      setDirection(1)
       setStep(step + 1)
     } else {
-      // Handle form submission
-      setIsSubmitting(true); // Set loading state
-      const finalFormData = {
-        ...formData,
-        submittedAt: new Date().toISOString()
-      }
-      console.log("Form Submitted:", finalFormData)
-      
+      setIsSubmitting(true)
+      const finalFormData = { ...formData, submittedAt: new Date().toISOString() }
       try {
-        // Send form data to API
-        const response = await fetch('/api/submit-form', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(finalFormData)
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to submit form');
-        }
-
-        // Save to localStorage for backup
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData));
-        }
-        
-        setStep(10) // Show thank you page
-      } catch (error) {
-        console.error('Error submitting form:', error);
-        toast({
-          title: "Erreur",
-          description: "Une erreur est survenue lors de l'envoi du formulaire. Veuillez réessayer.",
-          variant: "destructive",
-        });
-        setIsSubmitting(false); // Reset loading state on error
+        const response = await fetch('/api/submit-form', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalFormData) })
+        if (!response.ok) throw new Error('Failed')
+        if (typeof window !== 'undefined') localStorage.setItem('shapeItFormData', JSON.stringify(finalFormData))
+        setDirection(1)
+        setStep(10)
+      } catch {
+        toast({ title: "Erreur", description: "Une erreur est survenue. Veuillez réessayer.", variant: "destructive" })
+        setIsSubmitting(false)
       }
     }
   }
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1)
-    }
-  }
+  const handleBack = () => { if (step > 1) { setDirection(-1); setStep(step - 1) } }
 
   const handlePhoneConfirmation = (value: string) => {
-    setFormData({ ...formData, phoneConfirm: value });
-    
-    if (value === "yes") {
-      // Auto-proceed to next step if 'Yes' is selected
-      setTimeout(() => setStep(step + 1), 300);
-    } else {
-      // Show the edit phone UI if 'No' is selected
-      setIsEditingPhone(true);
-      setNewPhone(formData.phone);
-    }
+    setFormData(prev => ({ ...prev, phoneConfirm: value }))
+    if (value === "yes") { setTimeout(() => { setDirection(1); setStep(prev => prev + 1) }, 300) }
+    else { setIsEditingPhone(true); setNewPhone(formData.phone) }
   }
 
   const handlePhoneUpdate = () => {
-    setFormData({ ...formData, phone: newPhone, phoneConfirm: "" });
-    setIsEditingPhone(false);
-    // Don't auto-proceed, let them confirm the new number first
+    setFormData({ ...formData, phone: newPhone, phoneConfirm: "" })
+    setIsEditingPhone(false)
   }
 
-  // Get country dial code from country code
-  const getDialCode = (code: string) => {
-    const country = countries.find(c => c.code === code);
-    return country ? country.dialCode : "";
-  }
-
-  // Get country flag and details
-  const getCountryDetails = (code: string) => {
-    const country = countries.find(c => c.code === code);
-    return country || countries[0]; // Default to first country if not found
-  }
-
-  // Calculate progress percentage  
+  const getDialCode = (code: string) => countries.find(c => c.code === code)?.dialCode || ""
+  const getCountryDetails = (code: string) => countries.find(c => c.code === code) || countries[0]
   const progressPercentage = ((step - 1) / 8) * 100
 
+  const slideVariants = {
+    enter: (d: number) => ({ x: d > 0 ? 80 : -80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (d: number) => ({ x: d > 0 ? -80 : 80, opacity: 0 }),
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/30 to-primary/5">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
+    <div className="relative min-h-screen overflow-hidden bg-primary-900">
+      {/* Video + Splash intro */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black"
+            animate={{ opacity: splashFading ? 0 : 1 }}
+            transition={{ duration: 0.8 }}
+          >
+            <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'brightness(0.3)' }}>
+              <source src="/videos/form_bg.webm" type="video/webm" />
+              <source src="/videos/form_bg.mp4" type="video/mp4" />
+            </video>
+            <motion.div
+              className="relative z-10 flex flex-col items-center gap-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <Image src="/logo1.png" alt="Shape It" width={200} height={80} className="h-20 md:h-24 w-auto brightness-0 invert" priority />
+              <div className="h-px w-20 bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+              <p className="text-[11px] tracking-[0.6em] text-white/50 uppercase font-light">No Limits</p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Background */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-primary-800 to-black" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[150px]" />
+      </div>
+
+      <div className="relative z-10 container mx-auto px-4 py-6 min-h-screen flex flex-col">
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-6">
           <Link href="/">
-            <Button variant="outline" className="flex items-center space-x-2 text-white bg-primary/20 border-primary/30 hover:bg-primary/30 hover:text-white transition-all">
-              <ArrowLeft className="h-4 w-4" />
-              <span>Retour à l'accueil</span>
+            <Button variant="ghost" className="text-white/60 hover:text-white hover:bg-white/10 transition-all text-sm">
+              <ArrowLeft className="h-4 w-4 mr-2" /> Retour
             </Button>
           </Link>
+          <Image src="/logo1.png" alt="Shape It" width={80} height={32} className="h-8 w-auto brightness-0 invert opacity-60" />
         </div>
+
         {step < 10 ? (
-          <div className="mx-auto max-w-2xl">
-            <div className="flex justify-center mb-8">
-              <Image
-                src="/logo3.png"
-                alt="Shape It"
-                width={120}
-                height={50}
-                className="h-20 w-auto"
-              />
-            </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full max-w-lg">
+              {/* Price badge */}
+              <motion.div className="flex justify-center mb-6" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span className="text-white/90 text-sm font-light tracking-wide">Consultation Bilan Forme</span>
+                  <span className="text-white font-semibold text-sm">500 MAD</span>
+                </div>
+              </motion.div>
 
-            {/* Progress bar */}
-            <div className="mb-8">
-              <div className="h-3 w-full bg-white/70 rounded-full overflow-hidden shadow-inner">
-                <div 
-                  className="h-full bg-primary transition-all duration-500 ease-in-out" 
-                  style={{ width: `${progressPercentage}%` }}
-                ></div>
+              {/* Progress */}
+              <div className="mb-8 px-2">
+                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                  <motion.div className="h-full bg-gradient-to-r from-primary to-white/80 rounded-full" animate={{ width: `${progressPercentage}%` }} transition={{ duration: 0.5, ease: "easeOut" }} />
+                </div>
+                <div className="flex justify-between mt-2 text-[10px] text-white/30 tracking-wider uppercase font-light">
+                  <span>Début</span>
+                  <span>Étape {step}/9</span>
+                  <span>Fin</span>
+                </div>
               </div>
-              <div className="flex justify-between mt-2 text-xs text-white font-medium">
-                <span>Début</span>
-                <span>Étape {step}/9</span>
-                <span>Fin</span>
-              </div>
-            </div>
-            
-            <div className="rounded-xl bg-white/90 backdrop-blur-sm p-8 shadow-xl border border-primary/10">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {step === 1 && (
-                  <div className="space-y-6">
-                    <div className="text-center mb-6">
-                      <h2 className="text-2xl font-bold text-primary">
-                        Commencez votre parcours Shape It
-                      </h2>
-                      <p className="text-primary-dark mt-2">Merci de nous laisser vos coordonnées ci-dessous</p>
-                    </div>
-                    
-                    <div className="grid gap-5">
-                      <div>
-                        <Label htmlFor="firstName" className="text-sm font-medium text-primary-dark">Prénom *</Label>
-                        <Input
-                          id="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.firstName ? 'border-red-500' : ''}`}
-                          placeholder="Votre prénom"
-                        />
-                        {errors.firstName && (
-                          <p className="text-red-500 text-sm mt-1">{errors.firstName}</p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName" className="text-sm font-medium text-primary-dark">Nom *</Label>
-                        <Input
-                          id="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.lastName ? 'border-red-500' : ''}`}
-                          placeholder="Votre nom"
-                        />
-                        {errors.lastName && (
-                          <p className="text-red-500 text-sm mt-1">{errors.lastName}</p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="phone" className="text-sm font-medium text-primary-dark">Numéro de téléphone *</Label>
-                        <div className="flex mt-1">
-                          <Select
-                            value={formData.countryCode}
-                            onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
-                          >
-                            <SelectTrigger className={`w-[120px] border-r-0 rounded-r-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.phone ? 'border-red-500' : ''}`}>
-                              <SelectValue placeholder="Pays" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-white">
-                              {countries.map((country) => (
-                                <SelectItem key={country.code} value={country.code}>
-                                  <span className="flex items-center">
-                                    <span className="mr-2">{country.flag}</span>
-                                    <span>{country.dialCode}</span>
-                                  </span>
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            id="phone"
-                            type="tel"
-                            required
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className={`flex-1 rounded-l-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.phone ? 'border-red-500' : ''}`}
-                            placeholder="Votre téléphone"
-                          />
-                        </div>
-                        {errors.phone && (
-                          <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="email" className="text-sm font-medium text-primary-dark">E-mail *</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          required
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className={`mt-1 bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.email ? 'border-red-500' : ''}`}
-                          placeholder="votre@email.com"
-                        />
-                        {errors.email && (
-                          <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
 
-                {step === 2 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Parfait {formData.firstName} !
-                      </h2>
-                      <p className="text-primary-dark">Voici ce que comprend votre Bilan Forme complet</p>
-                    </div>
-                    
-                    <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
-                      <div className="space-y-3 mt-6">
-                        <h4 className="text-lg font-bold text-primary text-center">Ce que vous recevrez :</h4>
-                        <div className="grid gap-2">
-                          {[
-                            "1h dédiée pour votre scan de progression",
-                            "Tests avancés personnalisés",
-                            "Analyse complète masse grasse/masse musculaire",
-                            "Évaluation posturale détaillée",
-                            "Calcul métabolisme basal",
-                            "Test de condition physique",
-                            "Définition précise de vos objectifs",
-                            "Plan d'action sur mesure",
-                          ].map((item, index) => (
-                            <div key={index} className="flex items-center space-x-3 bg-white/80 p-3 rounded-lg shadow-sm border border-primary/10">
-                              <CheckSquare className="h-4 w-4 text-primary flex-shrink-0" />
-                              <span className="text-sm text-primary-dark">{item}</span>
+              {/* Form card */}
+              <div className="rounded-3xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                <form onSubmit={handleSubmit}>
+                  <AnimatePresence mode="wait" custom={direction}>
+                    <motion.div key={step} custom={direction} variants={slideVariants} initial="enter" animate="center" exit="exit" transition={{ duration: 0.3, ease: "easeInOut" }}>
+
+                      {/* Step 1: Contact Info */}
+                      {step === 1 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-6">
+                            <h2 className="text-2xl font-extralight text-white tracking-wide">Commencez votre parcours</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Merci de nous laisser vos coordonnées</p>
+                          </div>
+                          <div className="grid gap-4">
+                            <div>
+                              <Label htmlFor="firstName" className="text-xs text-white/50 uppercase tracking-wider font-light">Prénom *</Label>
+                              <Input id="firstName" required value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                className={`mt-1.5 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-white/30 focus:ring-1 focus:ring-white/10 ${errors.firstName ? 'border-red-400/50' : ''}`} placeholder="Votre prénom" />
+                              {errors.firstName && <p className="text-red-400 text-xs mt-1">{errors.firstName}</p>}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {step === 3 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faCalendar} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        D'accord {formData.firstName}, quelle est votre date de naissance ?
-                      </h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="month" className="text-sm font-medium text-primary-dark">Mois</Label>
-                        <Input
-                          id="month"
-                          placeholder="MM"
-                          required
-                          maxLength={2}
-                          value={formData.birthDate.month}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              birthDate: { ...formData.birthDate, month: e.target.value },
-                            })
-                          }
-                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="day" className="text-sm font-medium text-primary-dark">Jour</Label>
-                        <Input
-                          id="day"
-                          placeholder="JJ"
-                          required
-                          maxLength={2}
-                          value={formData.birthDate.day}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              birthDate: { ...formData.birthDate, day: e.target.value },
-                            })
-                          }
-                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="year" className="text-sm font-medium text-primary-dark">Année</Label>
-                        <Input
-                          id="year"
-                          placeholder="AAAA"
-                          required
-                          maxLength={4}
-                          value={formData.birthDate.year}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              birthDate: { ...formData.birthDate, year: e.target.value },
-                            })
-                          }
-                          className={`mt-1 text-center bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium ${errors.birthDate ? 'border-red-500' : ''}`}
-                        />
-                      </div>
-                      {errors.birthDate && (
-                        <div className="col-span-3">
-                          <p className="text-red-500 text-sm mt-1">{errors.birthDate}</p>
+                            <div>
+                              <Label htmlFor="lastName" className="text-xs text-white/50 uppercase tracking-wider font-light">Nom *</Label>
+                              <Input id="lastName" required value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                className={`mt-1.5 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-white/30 focus:ring-1 focus:ring-white/10 ${errors.lastName ? 'border-red-400/50' : ''}`} placeholder="Votre nom" />
+                              {errors.lastName && <p className="text-red-400 text-xs mt-1">{errors.lastName}</p>}
+                            </div>
+                            <div>
+                              <Label htmlFor="phone" className="text-xs text-white/50 uppercase tracking-wider font-light">Téléphone *</Label>
+                              <div className="flex mt-1.5">
+                                <Select value={formData.countryCode} onValueChange={(value) => setFormData({ ...formData, countryCode: value })}>
+                                  <SelectTrigger className={`w-[110px] border-r-0 rounded-r-none bg-white/5 border-white/10 text-white focus:border-white/30 ${errors.phone ? 'border-red-400/50' : ''}`}>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-primary-900 border-white/10">
+                                    {countries.map((c) => (
+                                      <SelectItem key={c.code} value={c.code} className="text-white">
+                                        <span className="flex items-center"><span className="mr-2">{c.flag}</span>{c.dialCode}</span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Input id="phone" type="tel" required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                  className={`flex-1 rounded-l-none bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-white/30 ${errors.phone ? 'border-red-400/50' : ''}`} placeholder="Votre téléphone" />
+                              </div>
+                              {errors.phone && <p className="text-red-400 text-xs mt-1">{errors.phone}</p>}
+                            </div>
+                            <div>
+                              <Label htmlFor="email" className="text-xs text-white/50 uppercase tracking-wider font-light">E-mail *</Label>
+                              <Input id="email" type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                className={`mt-1.5 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-white/30 focus:ring-1 focus:ring-white/10 ${errors.email ? 'border-red-400/50' : ''}`} placeholder="votre@email.com" />
+                              {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
+                            </div>
+                          </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-                )}
 
-                {step === 4 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faMapMarkerAlt} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Merci {formData.firstName}. 😊
-                      </h2>
-                      <p className="text-primary-dark">Connaissez-vous la localisation du centre?</p>
-                    </div>
-                    
-                    <div className="bg-primary/10 p-5 rounded-lg border border-primary/20 text-center mb-6">
-                      <p className="text-lg font-medium text-primary">Notre centre se trouve à:</p>
-                      <div className="flex items-center justify-center mt-3">
-                        <div className="bg-white/80 px-4 py-3 rounded-lg border border-primary/30 inline-flex items-center shadow-sm">
-                          <span className="font-bold text-xl text-primary-dark">SHAPE IT, boulevard de La grande ceinture, Ain Diab, Casablanca</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <RadioGroup
-                      value={formData.center}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, center: value });
-                        // Auto-proceed to next step if value is selected and valid
-                        if (value) {
-                          const newErrors = { ...errors };
-                          delete newErrors.center;
-                          setErrors(newErrors);
-                          setTimeout(() => setStep(step + 1), 300);
-                        }
-                      }}
-                      className="flex justify-center gap-4"
-                    >
-                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.center ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.center === "ain-diab" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                        <RadioGroupItem value="ain-diab" id="confirm-yes" className="hidden" />
-                        <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
-                          <span className="font-medium text-primary-dark">Oui</span>
-                        </Label>
-                      </div>
-                      <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.center ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.center === "need-info" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                        <RadioGroupItem value="need-info" id="confirm-no" className="hidden" />
-                        <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
-                          <span className="font-medium text-primary-dark">Non</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                    {errors.center && (
-                      <p className="text-red-500 text-sm mt-2 text-center">{errors.center}</p>
-                    )}
-                  </div>
-                )}
-
-                {step === 5 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faBullseye} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Vos objectifs
-                      </h2>
-                      <p className="text-primary-dark">Est-ce que vous pouvez nous en dire plus sur ce que vous souhaitez accomplir ?</p>
-                      <p className="text-sm text-primary-light italic">Choisissez-en autant que vous voulez</p>
-                    </div>
-                    
-                    <div className="grid md:grid-cols-2 gap-3">
-                      {goals.map((goal) => (
-                        <div 
-                          key={goal.id} 
-                          className={`flex items-center space-x-3 p-4 rounded-lg border ${errors.goals ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.goals.includes(goal.id) ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
-                        >
-                          <Checkbox
-                            id={goal.id}
-                            checked={formData.goals.includes(goal.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                const newGoals = [...formData.goals, goal.id];
-                                setFormData({
-                                  ...formData,
-                                  goals: newGoals,
-                                });
-                                if (newGoals.length > 0) {
-                                  const newErrors = { ...errors };
-                                  delete newErrors.goals;
-                                  setErrors(newErrors);
-                                }
-                              } else {
-                                setFormData({
-                                  ...formData,
-                                  goals: formData.goals.filter((id) => id !== goal.id),
-                                })
-                              }
-                            }}
-                            className="text-primary data-[state=checked]:bg-primary border-primary/50"
-                          />
-                          <Label htmlFor={goal.id} className="flex-1 cursor-pointer text-primary-dark">
-                            {goal.label}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                    {errors.goals && (
-                      <p className="text-red-500 text-sm mt-2 text-center">{errors.goals}</p>
-                    )}
-                  </div>
-                )}
-
-                {step === 6 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faPhoneAlt} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Confirmation de contact
-                      </h2>
-                      <p className="text-primary-dark">Pour accéder à votre Bilan Forme, veuillez nous confirmer votre numéro</p>
-                    </div>
-                    
-                    <div className="bg-primary/10 p-5 rounded-lg border border-primary/20 text-center mb-6">
-                      <p className="text-lg font-medium text-primary">Est-ce bien votre numéro ?</p>
-                      <div className="flex items-center justify-center mt-3">
-                        <div className="bg-white/80 px-4 py-3 rounded-lg border border-primary/30 inline-flex items-center shadow-sm">
-                          <span className="mr-2 text-lg">{getCountryDetails(formData.countryCode).flag}</span>
-                          <span className="font-bold text-xl text-primary-dark">{getDialCode(formData.countryCode)} {formData.phone}</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {!isEditingPhone ? (
-                      <>
-                        <RadioGroup
-                          value={formData.phoneConfirm}
-                          onValueChange={(value) => handlePhoneConfirmation(value)}
-                          className="flex justify-center gap-4"
-                        >
-                          <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.phoneConfirm ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.phoneConfirm === "yes" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                            <RadioGroupItem value="yes" id="confirm-yes" className="hidden" />
-                            <Label htmlFor="confirm-yes" className="flex items-center justify-center cursor-pointer w-full">
-                              <span className="font-medium text-primary-dark">Oui</span>
-                            </Label>
+                      {/* Step 2: Bilan Forme details with 500 MAD */}
+                      {step === 2 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", delay: 0.1 }}>
+                              <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Parfait {formData.firstName} !</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Votre Bilan Forme complet</p>
                           </div>
-                          <div className={`flex-1 flex items-center justify-center p-4 rounded-lg border ${errors.phoneConfirm ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.phoneConfirm === "no" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                            <RadioGroupItem value="no" id="confirm-no" className="hidden" />
-                            <Label htmlFor="confirm-no" className="flex items-center justify-center cursor-pointer w-full">
-                              <span className="font-medium text-primary-dark">Non</span>
-                            </Label>
-                          </div>
-                        </RadioGroup>
-                        {errors.phoneConfirm && (
-                          <p className="text-red-500 text-sm mt-2 text-center">{errors.phoneConfirm}</p>
-                        )}
-                      </>
-                    ) : (
-                      <div className="space-y-4 mt-6 animate-in fade-in-50 slide-in-from-bottom-5 duration-300">
-                        <div className="bg-primary/10 p-5 rounded-lg border border-primary/20">
-                          <h3 className="font-medium text-primary mb-3 flex items-center">
-                            <Phone className="w-4 h-4 mr-2" />
-                            Modifiez votre numéro de téléphone
-                          </h3>
-                          <div className="flex">
-                            <Select
-                              value={formData.countryCode}
-                              onValueChange={(value) => setFormData({ ...formData, countryCode: value })}
-                            >
-                              <SelectTrigger className="w-[120px] border-r-0 rounded-r-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20">
-                                <SelectValue>
-                                  <span className="flex items-center">
-                                    <span className="mr-1">{getCountryDetails(formData.countryCode).flag}</span>
-                                    <span>{getDialCode(formData.countryCode)}</span>
-                                  </span>
-                                </SelectValue>
-                              </SelectTrigger>
-                              <SelectContent className="bg-white">
-                                {countries.map((country) => (
-                                  <SelectItem key={country.code} value={country.code}>
-                                    <span className="flex items-center">
-                                      <span className="mr-2">{country.flag}</span>
-                                      <span>{country.dialCode}</span>
-                                    </span>
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <Input
-                              type="tel"
-                              required
-                              value={newPhone}
-                              onChange={(e) => setNewPhone(e.target.value)}
-                              className="flex-1 rounded-l-none bg-white/70 border-primary/20 focus:border-primary transition-all focus:ring-2 focus:ring-primary/20 text-gray-800 font-medium"
-                              placeholder="Votre téléphone"
-                            />
-                          </div>
-                          <div className="flex justify-end mt-4">
-                            <Button 
-                              type="button"
-                              onClick={handlePhoneUpdate}
-                              className="bg-primary hover:bg-primary-dark text-white transition-all"
-                            >
-                              Mettre à jour pour confirmation
-                            </Button>
+                          <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
+                            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+                              <span className="text-white/70 text-sm font-light">Consultation complète</span>
+                              <span className="text-white font-semibold text-lg">500 MAD</span>
+                            </div>
+                            <div className="grid gap-2">
+                              {["1h dédiée pour votre scan de progression", "Tests avancés personnalisés", "Analyse masse grasse/masse musculaire", "Évaluation posturale détaillée", "Calcul métabolisme basal", "Test de condition physique", "Définition précise de vos objectifs", "Plan d'action sur mesure"].map((item, i) => (
+                                <motion.div key={i} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
+                                  <CheckSquare className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                                  <span className="text-white/70 text-sm font-light">{item}</span>
+                                </motion.div>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
 
-                {step === 7 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Presque terminé !
-                      </h2>
-                      <p className="text-primary-dark">Veuillez confirmer que vous autorisez l'utilisation des informations recueillies pour vous contacter</p>
-                    </div>
-                    
-                    <div className="space-y-6 bg-primary/10 p-5 rounded-lg border border-primary/20">
-                      <div>
-                        <h3 className="font-medium text-primary mb-3 text-center">Vous préférez être coaché par :</h3>
-                        <RadioGroup
-                          value={formData.coachGender}
-                          onValueChange={(value) => {
-                            setFormData({ ...formData, coachGender: value });
-                            if (value) {
-                              const newErrors = { ...errors };
-                              delete newErrors.coachGender;
-                              setErrors(newErrors);
-                            }
-                          }}
-                          className="grid grid-cols-3 gap-3"
-                        >
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "female" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                            <RadioGroupItem value="female" id="gender-female" className="hidden" />
-                            <Label htmlFor="gender-female" className="flex flex-col items-center justify-center cursor-pointer w-full">
-                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
-                                <FontAwesomeIcon icon={faFemale} className="text-primary text-2xl" />
+                      {/* Step 3: Birth date */}
+                      {step === 3 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <FontAwesomeIcon icon={faCalendar} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Date de naissance</h2>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <Label className="text-xs text-white/50 uppercase tracking-wider font-light">Mois</Label>
+                              <Input placeholder="MM" maxLength={2} value={formData.birthDate.month} onChange={(e) => setFormData({ ...formData, birthDate: { ...formData.birthDate, month: e.target.value } })}
+                                className={`mt-1.5 text-center bg-white/5 border-white/10 text-white placeholder:text-white/20 ${errors.birthDate ? 'border-red-400/50' : ''}`} />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-white/50 uppercase tracking-wider font-light">Jour</Label>
+                              <Input placeholder="JJ" maxLength={2} value={formData.birthDate.day} onChange={(e) => setFormData({ ...formData, birthDate: { ...formData.birthDate, day: e.target.value } })}
+                                className={`mt-1.5 text-center bg-white/5 border-white/10 text-white placeholder:text-white/20 ${errors.birthDate ? 'border-red-400/50' : ''}`} />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-white/50 uppercase tracking-wider font-light">Année</Label>
+                              <Input placeholder="AAAA" maxLength={4} value={formData.birthDate.year} onChange={(e) => setFormData({ ...formData, birthDate: { ...formData.birthDate, year: e.target.value } })}
+                                className={`mt-1.5 text-center bg-white/5 border-white/10 text-white placeholder:text-white/20 ${errors.birthDate ? 'border-red-400/50' : ''}`} />
+                            </div>
+                          </div>
+                          {errors.birthDate && <p className="text-red-400 text-xs text-center">{errors.birthDate}</p>}
+                        </div>
+                      )}
+
+                      {/* Step 4: Location */}
+                      {step === 4 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <FontAwesomeIcon icon={faMapMarkerAlt} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Merci {formData.firstName} 😊</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Connaissez-vous la localisation du centre?</p>
+                          </div>
+                          <div className="rounded-2xl bg-white/5 border border-white/10 p-4 text-center">
+                            <p className="text-white/50 text-xs uppercase tracking-wider mb-2 font-light">Notre centre</p>
+                            <p className="text-white/90 font-light">SHAPE IT, boulevard de La grande ceinture, Ain Diab, Casablanca</p>
+                          </div>
+                          <div className="flex gap-3">
+                            {[{ v: "ain-diab", l: "Oui" }, { v: "need-info", l: "Non" }].map(o => (
+                              <button
+                                type="button"
+                                key={o.v}
+                                onClick={() => { setFormData(prev => ({ ...prev, center: o.v })); setErrors({}); setTimeout(() => { setDirection(1); setStep(prev => prev + 1) }, 350) }}
+                                className={`flex-1 p-4 rounded-2xl border transition-all cursor-pointer ${formData.center === o.v ? 'bg-white/10 border-white/30' : 'border-white/10 hover:bg-white/5'}`}
+                              >
+                                <span className="text-white/80 font-light">{o.l}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Step 5: Goals */}
+                      {step === 5 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <FontAwesomeIcon icon={faBullseye} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Vos objectifs</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Sélectionnez un ou plusieurs objectifs</p>
+                          </div>
+                          <div className="grid gap-2">
+                            {goals.map((goal, i) => (
+                              <motion.div
+                                key={goal.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04 }}
+                                className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.goals.includes(goal.id) ? 'bg-white/10 border-white/30' : 'border-white/10 hover:bg-white/5'}`}
+                                onClick={() => {
+                                  const newGoals = formData.goals.includes(goal.id) ? formData.goals.filter(g => g !== goal.id) : [...formData.goals, goal.id]
+                                  setFormData({ ...formData, goals: newGoals })
+                                  setErrors({})
+                                }}
+                              >
+                              <div className={`w-4 h-4 rounded-sm border flex-shrink-0 flex items-center justify-center ${formData.goals.includes(goal.id) ? 'bg-primary border-primary' : 'border-white/20'}`}>
+                                {formData.goals.includes(goal.id) && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                               </div>
-                              <span className="font-medium text-primary-dark">Une femme</span>
-                            </Label>
+                                <span className="text-white/80 text-sm font-light">{goal.label}</span>
+                              </motion.div>
+                            ))}
                           </div>
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "male" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                            <RadioGroupItem value="male" id="gender-male" className="hidden" />
-                            <Label htmlFor="gender-male" className="flex flex-col items-center justify-center cursor-pointer w-full">
-                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
-                                <FontAwesomeIcon icon={faMale} className="text-primary text-2xl" />
-                              </div>
-                              <span className="font-medium text-primary-dark">Un homme</span>
-                            </Label>
+                          {errors.goals && <p className="text-red-400 text-xs text-center mt-2">{errors.goals}</p>}
+                        </div>
+                      )}
+
+                      {/* Step 6: Phone confirmation */}
+                      {step === 6 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <FontAwesomeIcon icon={faPhoneAlt} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Confirmation</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Votre numéro est-il correct ?</p>
                           </div>
-                          <div className={`flex flex-col items-center justify-center p-4 rounded-lg border ${errors.coachGender ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.coachGender === "any" ? 'bg-primary/10 border-primary shadow-sm' : ''}`}>
-                            <RadioGroupItem value="any" id="gender-any" className="hidden" />
-                            <Label htmlFor="gender-any" className="flex flex-col items-center justify-center cursor-pointer w-full">
-                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mb-2">
-                                <FontAwesomeIcon icon={faUserFriends} className="text-primary text-2xl" />
-                              </div>
-                              <span className="font-medium text-primary-dark">Peu importe</span>
-                            </Label>
+                          <div className="rounded-2xl bg-white/5 border border-white/10 p-5 text-center">
+                            <p className="text-white/50 text-xs uppercase tracking-wider mb-2 font-light">Numéro enregistré</p>
+                            <p className="text-white text-xl font-light tracking-wide">{getDialCode(formData.countryCode)} {formData.phone}</p>
                           </div>
-                        </RadioGroup>
-                        {errors.coachGender && (
-                          <p className="text-red-500 text-sm mt-2 text-center">{errors.coachGender}</p>
-                        )}
-                      </div>
-                      
-                      <div className="flex items-start space-x-3 mt-4">
-                        <Checkbox
-                          id="consent"
-                          checked={formData.consent}
-                          onCheckedChange={(checked) => {
-                            setFormData({ ...formData, consent: checked as boolean });
-                            if (checked) {
-                              const newErrors = { ...errors };
-                              delete newErrors.consent;
-                              setErrors(newErrors);
-                            }
-                          }}
-                          required
-                          className={`mt-1 text-primary border-primary/50 ${errors.consent ? 'border-red-500' : ''}`}
-                        />
-                        <div>
-                          <Label htmlFor="consent" className="cursor-pointer font-medium text-primary">
-                            J'accepte les conditions
-                          </Label>
-                          <p className="text-sm text-primary-dark mt-1">
-                            En cochant cette case, vous acceptez que Shape It utilise vos informations pour vous contacter concernant votre demande de Bilan Forme et vous envoyer des informations pertinentes sur nos services.
-                          </p>
-                          {errors.consent && (
-                            <p className="text-red-500 text-sm mt-1">{errors.consent}</p>
+                          {!isEditingPhone ? (
+                            <div className="flex gap-3">
+                              {[{ v: "yes", l: "Oui, c'est correct" }, { v: "no", l: "Non, modifier" }].map(o => (
+                                <button
+                                  type="button"
+                                  key={o.v}
+                                  onClick={() => handlePhoneConfirmation(o.v)}
+                                  className={`flex-1 p-4 rounded-2xl border transition-all cursor-pointer ${formData.phoneConfirm === o.v ? 'bg-white/10 border-white/30' : 'border-white/10 hover:bg-white/5'}`}
+                                >
+                                  <span className="text-white/80 text-sm font-light">{o.l}</span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="space-y-3">
+                              <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-white/30" placeholder="Nouveau numéro" />
+                              <Button type="button" onClick={handlePhoneUpdate} className="w-full bg-primary hover:bg-primary/90 text-white rounded-xl">Mettre à jour</Button>
+                            </div>
                           )}
                         </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                      )}
 
-                {step === 8 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faQuestionCircle} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Dernière question, {formData.firstName}
-                      </h2>
-                      <p className="text-primary-dark">Comment avez-vous entendu parler de nous ?</p>
-                    </div>
-                    
-                    <RadioGroup
-                      value={formData.source}
-                      onValueChange={(value) => {
-                        setFormData({ ...formData, source: value });
-                        if (value) {
-                          const newErrors = { ...errors };
-                          delete newErrors.source;
-                          setErrors(newErrors);
-                        }
-                      }}
-                      className="space-y-3"
-                    >
-                      {sources.map((source) => (
-                        <div 
-                          key={source.id} 
-                          className={`flex items-center space-x-3 p-4 rounded-lg border ${errors.source ? 'border-red-500' : 'border-primary/30'} transition-all hover:bg-primary/10 ${formData.source === source.id ? 'bg-primary/10 border-primary shadow-sm' : ''}`}
-                        >
-                          <RadioGroupItem value={source.id} id={source.id} className="text-primary" />
-                          <Label htmlFor={source.id} className="cursor-pointer text-primary-dark">
-                            {source.label}
-                          </Label>
+                      {/* Step 7: Coach gender + consent */}
+                      {step === 7 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <h2 className="text-2xl font-extralight text-white">Préférence de coach</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Avez-vous une préférence ?</p>
+                          </div>
+                          <div className="grid grid-cols-3 gap-3">
+                            {[
+                              { v: "female", l: "Femme", icon: faFemale },
+                              { v: "male", l: "Homme", icon: faMale },
+                              { v: "no-preference", l: "Peu importe", icon: faUserFriends },
+                            ].map(o => (
+                              <button
+                                type="button"
+                                key={o.v}
+                                onClick={() => { setFormData(prev => ({ ...prev, coachGender: o.v })); setErrors({}) }}
+                                className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all cursor-pointer ${formData.coachGender === o.v ? 'bg-white/10 border-white/30' : 'border-white/10 hover:bg-white/5'}`}
+                              >
+                                <FontAwesomeIcon icon={o.icon} className="text-primary text-xl" />
+                                <span className="text-white/80 text-xs font-light">{o.l}</span>
+                              </button>
+                            ))}
+                          </div>
+                          {errors.coachGender && <p className="text-red-400 text-xs text-center">{errors.coachGender}</p>}
+                          <div className="pt-3 border-t border-white/10">
+                            <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5">
+                              <Checkbox
+                                id="consent"
+                                checked={formData.consent}
+                                onCheckedChange={(checked) => { setFormData({ ...formData, consent: checked as boolean }); setErrors({}) }}
+                                className="mt-0.5 border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <Label htmlFor="consent" className="text-white/60 text-xs font-light leading-relaxed cursor-pointer">
+                                J&apos;accepte que mes données soient utilisées pour me contacter et planifier ma consultation Bilan Forme à 500 MAD.
+                              </Label>
+                            </div>
+                            {errors.consent && <p className="text-red-400 text-xs mt-1">{errors.consent}</p>}
+                          </div>
                         </div>
-                      ))}
-                    </RadioGroup>
-                    {errors.source && (
-                      <p className="text-red-500 text-sm mt-2 text-center">{errors.source}</p>
-                    )}
-                  </div>
-                )}
+                      )}
 
-                {step === 9 && (
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2 mb-6">
-                      <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto flex items-center justify-center">
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-3xl" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-primary">
-                        Rappel important
-                      </h2>
-                      <p className="text-primary-dark">Veuillez prendre note des informations suivantes avant de finaliser votre demande</p>
-                    </div>
-                    
-                    <div className="bg-primary/15 p-6 rounded-lg border-2 border-primary/30">
-                      <div className="text-center">
-                        <p className="text-primary-dark mb-4">
-                          En cliquant sur "Confirmer", vous finalisez votre demande de Bilan Forme.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                      {/* Step 8: Source */}
+                      {step === 8 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <FontAwesomeIcon icon={faQuestionCircle} className="text-primary text-2xl" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Comment nous avez-vous connu ?</h2>
+                          </div>
+                          <div className="grid gap-2">
+                            {sources.map((source, i) => (
+                              <motion.div
+                                key={source.id}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.04 }}
+                                className={`flex items-center gap-3 p-3.5 rounded-2xl border transition-all cursor-pointer ${formData.source === source.id ? 'bg-white/10 border-white/30' : 'border-white/10 hover:bg-white/5'}`}
+                                onClick={() => { setFormData({ ...formData, source: source.id }); setErrors({}) }}
+                              >
+                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${formData.source === source.id ? 'border-primary' : 'border-white/20'}`}>
+                                  {formData.source === source.id && <div className="w-2 h-2 rounded-full bg-primary" />}
+                                </div>
+                                <span className="text-white/80 text-sm font-light">{source.label}</span>
+                              </motion.div>
+                            ))}
+                          </div>
+                          {errors.source && <p className="text-red-400 text-xs text-center mt-2">{errors.source}</p>}
+                        </div>
+                      )}
 
-                <div className="flex justify-between pt-4 mt-6">
-                  {step > 1 ? (
+                      {/* Step 9: Final confirmation with 500 MAD reminder */}
+                      {step === 9 && (
+                        <div className="space-y-5">
+                          <div className="text-center mb-4">
+                            <motion.div className="w-14 h-14 bg-amber-500/20 rounded-2xl mx-auto flex items-center justify-center mb-4" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring" }}>
+                              <Sparkles className="text-amber-400 w-6 h-6" />
+                            </motion.div>
+                            <h2 className="text-2xl font-extralight text-white">Dernière étape !</h2>
+                            <p className="text-white/50 text-sm mt-2 font-light">Vérifiez vos informations avant de confirmer</p>
+                          </div>
+                          <div className="rounded-2xl bg-white/5 border border-white/10 p-5 space-y-3">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-white/50 font-light">Nom</span>
+                              <span className="text-white/90">{formData.firstName} {formData.lastName}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-white/50 font-light">Téléphone</span>
+                              <span className="text-white/90">{getDialCode(formData.countryCode)} {formData.phone}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-white/50 font-light">Email</span>
+                              <span className="text-white/90">{formData.email}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-white/50 font-light">Objectifs</span>
+                              <span className="text-white/90 text-right max-w-[60%]">{formData.goals.map(g => goals.find(gl => gl.id === g)?.label).join(', ')}</span>
+                            </div>
+                          </div>
+                          <motion.div
+                            className="rounded-2xl bg-gradient-to-r from-amber-500/10 to-primary/10 border border-amber-500/20 p-5 text-center"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.2 }}
+                          >
+                            <p className="text-white/50 text-xs uppercase tracking-wider mb-1 font-light">Consultation Bilan Forme</p>
+                            <p className="text-white text-3xl font-light">500 <span className="text-lg text-white/70">MAD</span></p>
+                            <p className="text-white/40 text-xs mt-2 font-light">Payable au centre le jour du rendez-vous</p>
+                          </motion.div>
+                        </div>
+                      )}
+
+                    </motion.div>
+                  </AnimatePresence>
+
+                  {/* Navigation buttons */}
+                  <div className="flex items-center justify-between mt-8 pt-5 border-t border-white/10">
+                    {step > 1 ? (
+                      <Button type="button" variant="ghost" onClick={handleBack} className="text-white/50 hover:text-white hover:bg-white/10 text-sm">
+                        <ArrowLeft className="h-4 w-4 mr-2" /> Retour
+                      </Button>
+                    ) : <div />}
                     <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleBack}
-                      className="flex items-center space-x-2 text-white bg-primary/20 border-primary/30 hover:bg-primary/30 hover:text-white transition-all"
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={`px-6 py-2.5 rounded-xl text-sm font-light transition-all ${step === 9 ? 'bg-gradient-to-r from-amber-500 to-primary hover:from-amber-600 hover:to-primary/90 text-white shadow-lg shadow-amber-500/20' : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'}`}
                     >
-                      <ArrowLeft className="h-4 w-4" />
-                      <span>Retour</span>
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2"><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Envoi...</span>
+                      ) : step === 9 ? (
+                        <span className="flex items-center gap-2">Confirmer — 500 MAD <Sparkles className="w-4 h-4" /></span>
+                      ) : (
+                        <span className="flex items-center gap-2">Suivant <ArrowRight className="h-4 w-4" /></span>
+                      )}
                     </Button>
-                  ) : (
-                    <div></div> // Empty div for spacing when no back button
-                  )}
-                  
-                  {!(step === 6 && isEditingPhone) && (
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting && step === 9}
-                    className={`bg-primary hover:bg-primary-dark text-white px-6 py-2 transition-all flex items-center ${step === 1 ? "w-full" : ""}`}
-                  >
-                    {isSubmitting && step === 9 ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Envoi en cours...
-                      </>
-                    ) : (
-                      <>
-                        <span>{step === 9 ? "Confirmer" : "Suivant"}</span>
-                        {step !== 9 && <ArrowRight className="h-4 w-4 ml-2" />}
-                      </>
-                    )}
-                  </Button>
-                  )}
-                </div>
-              </form>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
+
         ) : (
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="rounded-xl bg-white/90 backdrop-blur-sm p-10 shadow-xl border border-primary/10">
-              <div className="mb-6 text-center">
-                <div className="h-20 w-20 bg-primary/20 rounded-full mx-auto flex items-center justify-center mb-4">
-                  <ThumbsUp className="h-10 w-10 text-primary" />
-                </div>
-                <h1 className="text-3xl font-bold text-primary">MERCI {formData.firstName.toUpperCase()}</h1>
-                <p className="text-sm text-primary-dark mt-1">Votre formulaire a été envoyé avec succès</p>
-              </div>
-              
-              <p className="mb-6 text-lg text-primary-dark">Un de nos coachs experts vous contactera au plus vite pour planifier votre Bilan Forme.</p>
-              
-              <div className="flex items-center justify-center bg-primary/10 p-4 rounded-lg mb-8 border border-primary/20">
-                <FontAwesomeIcon icon={faEnvelope} className="text-primary mr-3" />
-                <p className="text-primary-dark">Une confirmation a été envoyée à {formData.email}</p>
-              </div>
-              
-              <div className="mt-10 space-y-6 bg-primary/10 p-6 rounded-lg border border-primary/20 text-left">
-                <h2 className="text-xl font-bold text-primary text-center">
-                  Pour rappel, ce Bilan Forme, inclut :
-                </h2>
-                <div className="grid gap-3">
-                  <div className="flex items-center space-x-3 bg-white/80 p-4 rounded-lg shadow-sm border border-primary/10">
-                    <ThumbsUp className="h-5 w-5 text-primary flex-shrink-0" />
-                    <span className="text-primary-dark">1h dédiée pour effectuer votre scan de progression accéléré</span>
-                  </div>
-                  
-                  {[
-                    "Tests avancés",
-                    "Masse grasse / Masse musculaire",
-                    "Analyse posturale",
-                    "Métabolisme basal",
-                    "Test de condition physique",
-                    "Définition précise des objectifs",
-                    "Création d'un plan d'action sur mesure",
-                  ].map((item) => (
-                    <div key={item} className="flex items-center space-x-3 bg-white/80 p-4 rounded-lg shadow-sm border border-primary/10">
-                      <CheckSquare className="h-5 w-5 text-primary flex-shrink-0" />
-                      <span className="text-primary-dark">{item}</span>
-                    </div>
-                  ))}
-                </div>
-                
-              </div>
-              
-              <div className="mt-8">
+          /* Step 10: Thank you */
+          <div className="flex-1 flex items-center justify-center">
+            <motion.div
+              className="w-full max-w-lg text-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="rounded-3xl bg-white/[0.07] backdrop-blur-2xl border border-white/10 p-8 md:p-12 shadow-2xl">
+                <motion.div
+                  className="w-20 h-20 bg-primary/20 rounded-3xl mx-auto flex items-center justify-center mb-6"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", delay: 0.2 }}
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} className="text-primary text-4xl" />
+                </motion.div>
+                <h2 className="text-3xl font-extralight text-white mb-3">Merci {formData.firstName} !</h2>
+                <p className="text-white/50 font-light mb-6">Votre demande de consultation a été envoyée avec succès.</p>
+                <motion.div
+                  className="rounded-2xl bg-gradient-to-r from-amber-500/10 to-primary/10 border border-amber-500/20 p-5 mb-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <p className="text-white/50 text-xs uppercase tracking-wider mb-1 font-light">Consultation Bilan Forme</p>
+                  <p className="text-white text-3xl font-light">500 <span className="text-lg text-white/70">MAD</span></p>
+                  <p className="text-white/40 text-xs mt-2 font-light">Payable au centre le jour du rendez-vous</p>
+                </motion.div>
+                <p className="text-white/40 text-sm font-light mb-8">Notre équipe vous contactera sous 24h pour planifier votre rendez-vous.</p>
                 <Link href="/">
-                  <Button 
-                    className="bg-primary hover:bg-primary-dark text-white px-8 py-2 transition-all"
-                  >
-                    Retour à l'accueil
+                  <Button className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl px-8">
+                    <ArrowLeft className="h-4 w-4 mr-2" /> Retour à l&apos;accueil
                   </Button>
                 </Link>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
     </div>
   )
 }
-
