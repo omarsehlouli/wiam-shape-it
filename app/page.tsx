@@ -26,10 +26,10 @@ export default function Page() {
   const showcaseRefs = useRef<(HTMLVideoElement | null)[]>([])
 
   const showcaseVideos = [
-    { src: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.webm", label: "Entraînement" },
-    { src: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm", label: "Coaching" },
-    { src: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.webm", label: "Transformation" },
-    { src: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.webm", label: "Résultats" },
+    { webm: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.webm", mp4: "/videos/copy_0E8EA4DC-AD86-4592-BB0E-FD3EEC11C9FC.mp4", label: "Entraînement" },
+    { webm: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm", mp4: "/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4", label: "Coaching" },
+    { webm: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.webm", mp4: "/videos/copy_6B70F7FF-F698-469F-AE72-0B411112F19E.mp4", label: "Transformation" },
+    { webm: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.webm", mp4: "/videos/copy_EFD42330-C1B8-42D8-B7BE-1EA668C8854A.mp4", label: "Résultats" },
   ]
 
   // Intro: show logo, then fade out (no lift)
@@ -91,6 +91,7 @@ export default function Page() {
               style={{ filter: 'blur(30px) brightness(0.25)', transform: 'scale(1.2)' }}
             >
               <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.webm" type="video/webm" />
+              <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-black/50" />
             
@@ -128,6 +129,7 @@ export default function Page() {
             style={{ filter: 'brightness(0.4)' }}
           >
             <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.webm" type="video/webm" />
+            <source src="/videos/03a00b5e-3baa-47a5-8114-4c9632194503.mp4" type="video/mp4" />
           </video>
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-primary-900/80" />
@@ -243,7 +245,8 @@ export default function Page() {
                     muted loop playsInline preload="metadata"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   >
-                    <source src={video.src} type="video/webm" />
+                    <source src={video.webm} type="video/webm" />
+                    <source src={video.mp4} type="video/mp4" />
                   </video>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/10 group-hover:from-black/50 group-hover:via-transparent transition-all duration-500" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-40 group-hover:opacity-0 transition-opacity duration-500">
@@ -492,6 +495,7 @@ export default function Page() {
         <section className="relative py-28 md:py-36 overflow-hidden">
           <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" style={{ filter: 'brightness(0.2)' }}>
             <source src="/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.webm" type="video/webm" />
+            <source src="/videos/copy_9282FAA2-ECB2-4E09-9F87-EEA2DEB4EE54.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-b from-primary-900/60 via-primary-800/40 to-primary-900/70" />
           
